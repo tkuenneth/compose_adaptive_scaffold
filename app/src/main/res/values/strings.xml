@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">AdaptiveScaffoldDemo</string>
+
+    <string name="one">One</string>
+    <string name="two">Two</string>
+    <string name="three">Three</string>
+
+    <string name="body">body</string>
+    <string name="small_body">small body</string>
+    <string name="secondary_body">secondary body</string>
+    <string name="small_secondary_body">small secondary body</string>
+
+</resources>
