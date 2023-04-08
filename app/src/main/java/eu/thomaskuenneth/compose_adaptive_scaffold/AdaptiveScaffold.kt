@@ -236,12 +236,6 @@ private fun FoldableScreen(
                 .height(foldDef.foldHeight)
         )
     }
-    val firstComposable = @Composable {
-        body()
-    }
-    val secondComposable = @Composable {
-        secondaryBody()
-    }
     val container = @Composable {
         if (foldDef.foldOrientation == FoldingFeature.Orientation.VERTICAL) {
             Row(modifier = Modifier.fillMaxSize()) {
@@ -250,7 +244,7 @@ private fun FoldableScreen(
                         .fillMaxHeight()
                         .weight(1.0F)
                 ) {
-                    firstComposable()
+                    body()
                 }
                 hinge()
                 Box(
@@ -258,7 +252,7 @@ private fun FoldableScreen(
                         .fillMaxHeight()
                         .width(foldDef.widthRightOrBottom)
                 ) {
-                    secondComposable()
+                    secondaryBody()
                 }
             }
         } else {
@@ -268,7 +262,7 @@ private fun FoldableScreen(
                         .fillMaxWidth()
                         .weight(1.0F)
                 ) {
-                    firstComposable()
+                    body()
                 }
                 hinge()
                 Box(
@@ -276,7 +270,7 @@ private fun FoldableScreen(
                         .fillMaxWidth()
                         .height(foldDef.heightRightOrBottom)
                 ) {
-                    secondComposable()
+                    secondaryBody()
                 }
             }
         }
