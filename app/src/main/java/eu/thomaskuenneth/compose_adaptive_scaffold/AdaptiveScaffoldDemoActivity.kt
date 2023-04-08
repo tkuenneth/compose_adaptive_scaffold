@@ -18,10 +18,12 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -135,10 +137,13 @@ private fun ColoredBoxWithText(
     Box(
         modifier = modifier
             .background(color)
-            .border(1.dp, Color.White)
+            .border(1.dp, Color.White),
+        contentAlignment = Alignment.Center
     ) {
         Text(
-            text = text
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
         )
     }
 }
