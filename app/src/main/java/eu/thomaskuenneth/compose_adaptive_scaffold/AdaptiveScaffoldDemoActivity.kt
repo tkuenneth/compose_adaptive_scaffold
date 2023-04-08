@@ -32,7 +32,7 @@ class FoldableDemoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 setContent {
                     val index = rememberSaveable { mutableStateOf(0) }
                     val destinations = listOf(
