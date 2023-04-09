@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package eu.thomaskuenneth.compose_adaptive_scaffold
 
 import android.app.Activity
@@ -19,8 +21,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.PermanentDrawerSheet
+import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.window.core.ExperimentalWindowApi
 import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.window.layout.FoldingFeature
@@ -48,6 +54,7 @@ data class NavigationDestination(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalWindowApi::class)
 @Composable
 fun Activity.AdaptiveScaffold(
+    useDrawer: Boolean = true,
     index: MutableState<Int>,
     destinations: List<NavigationDestination> = emptyList(),
     body: @Composable () -> Unit = {},
@@ -63,9 +70,11 @@ fun Activity.AdaptiveScaffold(
     val windowMetrics = WindowMetricsCalculator.getOrCreate()
         .computeCurrentWindowMetrics(this)
     val foldDef = createFoldDef(layoutInfo, windowMetrics)
+    val hasDrawer =
+        useDrawer && foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
     val hasBottomBar =
         foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
-    val hasNavigationRail = !hasBottomBar
+    val hasNavigationRail = !hasBottomBar && !hasDrawer
     Scaffold(
         bottomBar = {
             AdaptiveScaffoldBottomBar(
@@ -79,6 +88,7 @@ fun Activity.AdaptiveScaffold(
             foldDef = foldDef,
             paddingValues = padding,
             hasNavigationRail = hasNavigationRail,
+            hasDrawer = hasDrawer,
             index = index,
             destinations = destinations,
             body = body,
@@ -127,13 +137,13 @@ private fun AdaptiveScaffoldBottomBar(
 }
 
 @Composable
-fun AdaptiveScaffoldNavigationRail(
+private fun AdaptiveScaffoldNavigationRail(
     hasNavigationRail: Boolean,
     index: MutableState<Int>,
     destinations: List<NavigationDestination>
 ) {
     if (hasNavigationRail)
-        NavigationRail() {
+        NavigationRail {
             for (i in destinations.indices)
                 with(destinations[i]) {
                     val label = stringResource(id = label)
@@ -155,10 +165,50 @@ fun AdaptiveScaffoldNavigationRail(
 }
 
 @Composable
+private fun AdaptiveScaffoldDrawer(
+    hasDrawer: Boolean,
+    index: MutableState<Int>,
+    destinations: List<NavigationDestination>,
+    content: @Composable () -> Unit
+) {
+    if (hasDrawer)
+        PermanentNavigationDrawer(
+            drawerContent = {
+                PermanentDrawerSheet(Modifier.width(240.dp)) {
+                    Spacer(Modifier.height(12.dp))
+                    for (i in destinations.indices)
+                        with(destinations[i]) {
+                            val label = stringResource(id = label)
+                            NavigationDrawerItem(
+                                selected = i == index.value,
+                                onClick = { index.value = i },
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(id = icon),
+                                        contentDescription = label
+                                    )
+                                },
+                                label = {
+                                    Text(text = label)
+                                },
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            )
+                        }
+                }
+            },
+            content = content
+        )
+    else {
+        content()
+    }
+}
+
+@Composable
 private fun AdaptiveScaffoldContent(
     foldDef: FoldDef,
     paddingValues: PaddingValues,
     hasNavigationRail: Boolean,
+    hasDrawer: Boolean,
     index: MutableState<Int>,
     destinations: List<NavigationDestination>,
     body: @Composable () -> Unit,
@@ -166,36 +216,44 @@ private fun AdaptiveScaffoldContent(
     secondaryBody: @Composable () -> Unit,
     smallSecondaryBody: @Composable () -> Unit,
 ) {
-    Row(modifier = Modifier.fillMaxSize()) {
-        AdaptiveScaffoldNavigationRail(
-            hasNavigationRail = hasNavigationRail,
-            index = index,
-            destinations = destinations,
-        )
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues = paddingValues)
-        ) {
-            if (foldDef.hasFold) {
-                FoldableScreen(
-                    foldDef = foldDef,
-                    body = body,
-                    secondaryBody = secondaryBody,
-                )
-            } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
-                TwoPaneScreen(
-                    firstPane = body,
-                    secondPane = secondaryBody
-                )
-            } else {
-                TwoPaneScreen(
-                    firstPane = smallBody,
-                    secondPane = smallSecondaryBody
-                )
+    val content: @Composable () -> Unit = {
+        Row(modifier = Modifier.fillMaxSize()) {
+            AdaptiveScaffoldNavigationRail(
+                hasNavigationRail = hasNavigationRail,
+                index = index,
+                destinations = destinations,
+            )
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues = paddingValues)
+            ) {
+                if (foldDef.hasFold) {
+                    FoldableScreen(
+                        foldDef = foldDef,
+                        body = body,
+                        secondaryBody = secondaryBody,
+                    )
+                } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
+                    TwoPaneScreen(
+                        firstPane = body,
+                        secondPane = secondaryBody
+                    )
+                } else {
+                    TwoPaneScreen(
+                        firstPane = smallBody,
+                        secondPane = smallSecondaryBody
+                    )
+                }
             }
         }
     }
+    AdaptiveScaffoldDrawer(
+        hasDrawer = hasDrawer,
+        index = index,
+        destinations = destinations,
+        content = content
+    )
 }
 
 @Composable
