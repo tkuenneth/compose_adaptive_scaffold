@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -36,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.ExperimentalWindowApi
 import androidx.window.core.layout.WindowWidthSizeClass
@@ -53,14 +55,14 @@ data class NavigationDestination(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalWindowApi::class)
 @Composable
 fun Activity.AdaptiveScaffold(
-    useDrawer: Boolean = true,
+    useDrawer: Boolean,
     index: Int,
     onSelectedIndexChange: (Int) -> Unit,
-    destinations: List<NavigationDestination> = emptyList(),
-    body: @Composable () -> Unit = {},
-    smallBody: @Composable () -> Unit = {},
-    secondaryBody: @Composable () -> Unit = {},
-    smallSecondaryBody: @Composable () -> Unit = {}
+    destinations: List<NavigationDestination>,
+    body: @Composable () -> Unit,
+    smallBody: @Composable () -> Unit,
+    secondaryBody: @Composable () -> Unit,
+    smallSecondaryBody: (@Composable () -> Unit)?
 ) {
     val context = LocalContext.current
     val layoutInfo by WindowInfoTracker.getOrCreate(context)
@@ -220,7 +222,7 @@ private fun AdaptiveScaffoldContent(
     body: @Composable () -> Unit,
     smallBody: @Composable () -> Unit,
     secondaryBody: @Composable () -> Unit,
-    smallSecondaryBody: @Composable () -> Unit,
+    smallSecondaryBody: (@Composable () -> Unit)?,
 ) {
     val content: @Composable () -> Unit = {
         Row(modifier = Modifier.fillMaxSize()) {
@@ -244,12 +246,14 @@ private fun AdaptiveScaffoldContent(
                 } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
                     TwoPaneScreen(
                         firstPane = body,
-                        secondPane = secondaryBody
+                        secondPane = secondaryBody,
+                        maxWidth = maxWidth
                     )
                 } else {
                     TwoPaneScreen(
                         firstPane = smallBody,
-                        secondPane = smallSecondaryBody
+                        secondPane = smallSecondaryBody,
+                        maxWidth = maxWidth
                     )
                 }
             }
@@ -267,7 +271,8 @@ private fun AdaptiveScaffoldContent(
 @Composable
 private fun TwoPaneScreen(
     firstPane: @Composable () -> Unit,
-    secondPane: @Composable () -> Unit,
+    secondPane: (@Composable () -> Unit)?,
+    maxWidth: Dp
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -276,14 +281,21 @@ private fun TwoPaneScreen(
         Row(
             modifier = Modifier.fillMaxSize(),
         ) {
-            val localModifier = Modifier
-                .fillMaxHeight()
-                .weight(0.5F)
-            Box(modifier = localModifier) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1.0F)
+            ) {
                 firstPane()
             }
-            Box(modifier = localModifier) {
-                secondPane()
+            if (secondPane != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .size(maxWidth / 2)
+                ) {
+                    secondPane()
+                }
             }
         }
     }

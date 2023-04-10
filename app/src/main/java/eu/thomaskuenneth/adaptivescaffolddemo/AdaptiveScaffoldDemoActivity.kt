@@ -9,6 +9,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
@@ -41,6 +43,7 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 setContent {
                     var index by rememberSaveable { mutableStateOf(0) }
+                    var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
                     val destinations = listOf(
                         NavigationDestination(
                             icon = R.drawable.ic_android_black_24dp,
@@ -58,13 +61,21 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                     MaterialTheme(
                         content = {
                             AdaptiveScaffold(
+                                useDrawer = true,
                                 index = index,
                                 onSelectedIndexChange = { i -> index = i },
                                 destinations = destinations,
                                 body = { Body() },
-                                smallBody = { SmallBody() },
+                                smallBody = {
+                                    SmallBody {
+                                        showSmallSecondaryBody = !showSmallSecondaryBody
+                                    }
+                                },
                                 secondaryBody = { SecondaryBody() },
-                                smallSecondaryBody = { SmallSecondaryBody() }
+                                smallSecondaryBody = if (showSmallSecondaryBody) {
+                                    { SmallSecondaryBody() }
+                                } else
+                                    null
                             )
                         },
                         colorScheme = defaultColorScheme()
@@ -104,13 +115,23 @@ private fun Body() {
 }
 
 @Composable
-private fun SmallBody() {
-    ColoredBoxWithText(
-        modifier = Modifier
-            .fillMaxSize(),
-        color = Color.Yellow,
-        text = stringResource(id = R.string.small_body)
-    )
+private fun SmallBody(onClick: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        ColoredBoxWithText(
+            modifier = Modifier
+                .fillMaxSize(),
+            color = Color.Yellow,
+            text = stringResource(id = R.string.small_body)
+        )
+        Button(
+            modifier = Modifier.padding(top = 32.dp, start = 32.dp),
+            onClick = onClick
+        ) {
+            Text(
+                text = stringResource(id = R.string.toggle)
+            )
+        }
+    }
 }
 
 @Composable
