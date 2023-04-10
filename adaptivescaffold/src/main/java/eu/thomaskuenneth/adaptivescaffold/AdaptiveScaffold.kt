@@ -1,6 +1,6 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
-package eu.thomaskuenneth.compose_adaptive_scaffold
+package eu.thomaskuenneth.adaptivescaffold
 
 import android.app.Activity
 import androidx.annotation.DrawableRes

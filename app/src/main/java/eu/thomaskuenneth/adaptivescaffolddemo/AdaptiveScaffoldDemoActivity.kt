@@ -1,4 +1,4 @@
-package eu.thomaskuenneth.compose_adaptive_scaffold
+package eu.thomaskuenneth.adaptivescaffolddemo
 
 import android.os.Build
 import android.os.Bundle
@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
+import eu.thomaskuenneth.adaptivescaffold.NavigationDestination
 import kotlinx.coroutines.launch
 
 class AdaptiveScaffoldDemoActivity : ComponentActivity() {

@@ -7,3 +7,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "compose_adaptive_scaffold"
 include ':app'
+include ':adaptivescaffold'

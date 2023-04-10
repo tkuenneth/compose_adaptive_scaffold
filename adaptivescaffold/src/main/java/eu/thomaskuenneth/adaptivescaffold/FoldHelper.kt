@@ -1,4 +1,4 @@
-package eu.thomaskuenneth.compose_adaptive_scaffold
+package eu.thomaskuenneth.adaptivescaffold
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
