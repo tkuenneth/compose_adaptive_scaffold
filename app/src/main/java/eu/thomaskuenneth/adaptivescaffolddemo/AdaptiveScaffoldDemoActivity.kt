@@ -16,8 +16,10 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,7 +40,7 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 setContent {
-                    val index = rememberSaveable { mutableStateOf(0) }
+                    var index by rememberSaveable { mutableStateOf(0) }
                     val destinations = listOf(
                         NavigationDestination(
                             icon = R.drawable.ic_android_black_24dp,
@@ -57,6 +59,7 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                         content = {
                             AdaptiveScaffold(
                                 index = index,
+                                onSelectedIndexChange = { i -> index = i },
                                 destinations = destinations,
                                 body = { Body() },
                                 smallBody = { SmallBody() },

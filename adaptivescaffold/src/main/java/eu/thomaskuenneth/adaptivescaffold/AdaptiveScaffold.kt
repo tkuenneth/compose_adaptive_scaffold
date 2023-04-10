@@ -29,7 +29,6 @@ import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -55,7 +54,8 @@ data class NavigationDestination(
 @Composable
 fun Activity.AdaptiveScaffold(
     useDrawer: Boolean = true,
-    index: MutableState<Int>,
+    index: Int,
+    onSelectedIndexChange: (Int) -> Unit,
     destinations: List<NavigationDestination> = emptyList(),
     body: @Composable () -> Unit = {},
     smallBody: @Composable () -> Unit = {},
@@ -80,6 +80,7 @@ fun Activity.AdaptiveScaffold(
             AdaptiveScaffoldBottomBar(
                 hasBottomBar = hasBottomBar,
                 index = index,
+                onSelectedIndexChange = onSelectedIndexChange,
                 destinations = destinations
             )
         }
@@ -90,6 +91,7 @@ fun Activity.AdaptiveScaffold(
             hasNavigationRail = hasNavigationRail,
             hasDrawer = hasDrawer,
             index = index,
+            onSelectedIndexChange = onSelectedIndexChange,
             destinations = destinations,
             body = body,
             smallBody = smallBody,
@@ -111,7 +113,8 @@ fun Activity.AdaptiveScaffold(
 @Composable
 private fun AdaptiveScaffoldBottomBar(
     hasBottomBar: Boolean,
-    index: MutableState<Int>,
+    index: Int,
+    onSelectedIndexChange: (Int) -> Unit,
     destinations: List<NavigationDestination>
 ) {
     if (hasBottomBar)
@@ -120,8 +123,8 @@ private fun AdaptiveScaffoldBottomBar(
                 with(destinations[i]) {
                     val label = stringResource(id = label)
                     NavigationBarItem(
-                        selected = i == index.value,
-                        onClick = { index.value = i },
+                        selected = i == index,
+                        onClick = { onSelectedIndexChange(i) },
                         icon = {
                             Icon(
                                 painter = painterResource(id = icon),
@@ -139,7 +142,8 @@ private fun AdaptiveScaffoldBottomBar(
 @Composable
 private fun AdaptiveScaffoldNavigationRail(
     hasNavigationRail: Boolean,
-    index: MutableState<Int>,
+    index: Int,
+    onSelectedIndexChange: (Int) -> Unit,
     destinations: List<NavigationDestination>
 ) {
     if (hasNavigationRail)
@@ -148,8 +152,8 @@ private fun AdaptiveScaffoldNavigationRail(
                 with(destinations[i]) {
                     val label = stringResource(id = label)
                     NavigationRailItem(
-                        selected = i == index.value,
-                        onClick = { index.value = i },
+                        selected = i == index,
+                        onClick = { onSelectedIndexChange(i) },
                         icon = {
                             Icon(
                                 painter = painterResource(id = icon),
@@ -167,7 +171,8 @@ private fun AdaptiveScaffoldNavigationRail(
 @Composable
 private fun AdaptiveScaffoldDrawer(
     hasDrawer: Boolean,
-    index: MutableState<Int>,
+    index: Int,
+    onSelectedIndexChange: (Int) -> Unit,
     destinations: List<NavigationDestination>,
     content: @Composable () -> Unit
 ) {
@@ -180,8 +185,8 @@ private fun AdaptiveScaffoldDrawer(
                         with(destinations[i]) {
                             val label = stringResource(id = label)
                             NavigationDrawerItem(
-                                selected = i == index.value,
-                                onClick = { index.value = i },
+                                selected = i == index,
+                                onClick = { onSelectedIndexChange(i) },
                                 icon = {
                                     Icon(
                                         painter = painterResource(id = icon),
@@ -209,7 +214,8 @@ private fun AdaptiveScaffoldContent(
     paddingValues: PaddingValues,
     hasNavigationRail: Boolean,
     hasDrawer: Boolean,
-    index: MutableState<Int>,
+    index: Int,
+    onSelectedIndexChange: (Int) -> Unit,
     destinations: List<NavigationDestination>,
     body: @Composable () -> Unit,
     smallBody: @Composable () -> Unit,
@@ -221,6 +227,7 @@ private fun AdaptiveScaffoldContent(
             AdaptiveScaffoldNavigationRail(
                 hasNavigationRail = hasNavigationRail,
                 index = index,
+                onSelectedIndexChange = onSelectedIndexChange,
                 destinations = destinations,
             )
             BoxWithConstraints(
@@ -251,6 +258,7 @@ private fun AdaptiveScaffoldContent(
     AdaptiveScaffoldDrawer(
         hasDrawer = hasDrawer,
         index = index,
+        onSelectedIndexChange = onSelectedIndexChange,
         destinations = destinations,
         content = content
     )
