@@ -1,20 +1,40 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'maven-publish'
+    id 'signing'
+}
+
+publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'io.github.tkuenneth'
+            artifactId = 'compose_adaptive_scaffold'
+            version = '0.0.1'
+            afterEvaluate {
+                from components.release
+            }
+        }
+    }
 }
 
 android {
     namespace 'eu.thomaskuenneth.adaptivescaffold'
     compileSdk 33
-
+    publishing {
+        singleVariant('release') {
+            withSourcesJar()
+        }
+    }
     defaultConfig {
         minSdk 28
         targetSdk 33
-
+        aarMetadata {
+            minCompileSdk = 33
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
-
     buildTypes {
         release {
             minifyEnabled false
