@@ -1,54 +1,19 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
-    id 'maven-publish'
-    id 'signing'
 }
 
-publishing {
-    publications {
-        release(MavenPublication) {
-            groupId = 'io.github.tkuenneth'
-            artifactId = 'compose_adaptive_scaffold'
-            version = '0.0.1'
-            afterEvaluate {
-                from components.release
-            }
-            pom {
-                name = 'compose_adaptive_scaffold'
-                description = 'Make supporting large screens and foldables a breeze'
-                url = 'https://github.com/tkuenneth/compose_adaptive_scaffold'
-                licenses {
-                    license {
-                        name = 'MIT license'
-                        url = 'https://opensource.org/license/mit/'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'tkuenneth'
-                        name = 'Thomas Kuenneth'
-                        email = 'thomas@thomaskuenneth.eu'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:https://github.com/tkuenneth/compose_adaptive_scaffold.git'
-                    developerConnection = 'scm:git:https://github.com/tkuenneth/compose_adaptive_scaffold.git'
-                    url = 'https://github.com/tkuenneth/compose_adaptive_scaffold'
-                }
-            }
-        }
-    }
+ext {
+    PUBLISH_GROUP_ID = 'io.github.tkuenneth'
+    PUBLISH_VERSION = '0.0.1'
+    PUBLISH_ARTIFACT_ID = 'compose_adaptive_scaffold'
 }
+
+apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
 
 android {
     namespace 'eu.thomaskuenneth.adaptivescaffold'
     compileSdk 33
-    publishing {
-        singleVariant('release') {
-            withSourcesJar()
-        }
-    }
     defaultConfig {
         minSdk 28
         targetSdk 33
