@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -44,6 +45,7 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                 setContent {
                     var index by rememberSaveable { mutableStateOf(0) }
                     var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
+                    var showDestinations by rememberSaveable { mutableStateOf(true) }
                     val destinations = listOf(
                         NavigationDestination(
                             icon = R.drawable.ic_android_black_24dp,
@@ -58,18 +60,28 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                             label = R.string.three
                         ),
                     )
+                    val toggleDestinations = {
+                        showDestinations = !showDestinations
+                    }
                     MaterialTheme(
                         content = {
                             AdaptiveScaffold(
                                 useDrawer = true,
                                 index = index,
                                 onSelectedIndexChange = { i -> index = i },
-                                destinations = destinations,
-                                body = { Body() },
+                                destinations = if (showDestinations) destinations else emptyList(),
+                                body = {
+                                    Body(
+                                        onClickShowDestinations = toggleDestinations
+                                    )
+                                },
                                 smallBody = {
-                                    SmallBody {
-                                        showSmallSecondaryBody = !showSmallSecondaryBody
-                                    }
+                                    SmallBody(
+                                        onClickShowSmallSecondaryBody = {
+                                            showSmallSecondaryBody = !showSmallSecondaryBody
+                                        },
+                                        onClickShowDestinations = toggleDestinations
+                                    )
                                 },
                                 secondaryBody = { SecondaryBody() },
                                 smallSecondaryBody = if (showSmallSecondaryBody) {
@@ -105,17 +117,32 @@ private fun defaultColorScheme() = with(isSystemInDarkTheme()) {
 }
 
 @Composable
-private fun Body() {
-    ColoredBoxWithText(
-        modifier = Modifier
-            .fillMaxSize(),
-        color = Color.Red,
-        text = stringResource(id = R.string.body)
-    )
+private fun Body(
+    onClickShowDestinations: () -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        ColoredBoxWithText(
+            modifier = Modifier
+                .fillMaxSize(),
+            color = Color.Red,
+            text = stringResource(id = R.string.body)
+        )
+        Button(
+            modifier = Modifier.padding(top = 32.dp, start = 32.dp),
+            onClick = onClickShowDestinations
+        ) {
+            Text(
+                text = stringResource(id = R.string.toggle_destinations)
+            )
+        }
+    }
 }
 
 @Composable
-private fun SmallBody(onClick: () -> Unit) {
+private fun SmallBody(
+    onClickShowSmallSecondaryBody: () -> Unit,
+    onClickShowDestinations: () -> Unit
+) {
     Box(modifier = Modifier.fillMaxSize()) {
         ColoredBoxWithText(
             modifier = Modifier
@@ -123,13 +150,22 @@ private fun SmallBody(onClick: () -> Unit) {
             color = Color.Yellow,
             text = stringResource(id = R.string.small_body)
         )
-        Button(
-            modifier = Modifier.padding(top = 32.dp, start = 32.dp),
-            onClick = onClick
-        ) {
-            Text(
-                text = stringResource(id = R.string.toggle)
-            )
+        Column(modifier = Modifier.padding(32.dp)) {
+            Button(
+                onClick = onClickShowSmallSecondaryBody
+            ) {
+                Text(
+                    text = stringResource(id = R.string.toggle_small_secondary_body)
+                )
+            }
+            Button(
+                modifier = Modifier.padding(top = 16.dp),
+                onClick = onClickShowDestinations
+            ) {
+                Text(
+                    text = stringResource(id = R.string.toggle_destinations)
+                )
+            }
         }
     }
 }

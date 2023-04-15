@@ -119,7 +119,7 @@ private fun AdaptiveScaffoldBottomBar(
     onSelectedIndexChange: (Int) -> Unit,
     destinations: List<NavigationDestination>
 ) {
-    if (hasBottomBar)
+    if (hasBottomBar && destinations.isNotEmpty())
         NavigationBar {
             for (i in destinations.indices)
                 with(destinations[i]) {
@@ -148,7 +148,7 @@ private fun AdaptiveScaffoldNavigationRail(
     onSelectedIndexChange: (Int) -> Unit,
     destinations: List<NavigationDestination>
 ) {
-    if (hasNavigationRail)
+    if (hasNavigationRail && destinations.isNotEmpty())
         NavigationRail {
             for (i in destinations.indices)
                 with(destinations[i]) {
@@ -178,7 +178,7 @@ private fun AdaptiveScaffoldDrawer(
     destinations: List<NavigationDestination>,
     content: @Composable () -> Unit
 ) {
-    if (hasDrawer)
+    if (hasDrawer && destinations.isNotEmpty())
         PermanentNavigationDrawer(
             drawerContent = {
                 PermanentDrawerSheet(Modifier.width(240.dp)) {

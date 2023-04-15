@@ -4,8 +4,8 @@ plugins {
 }
 
 ext {
-    PUBLISH_GROUP_ID = 'io.github.tkuenneth'
-    PUBLISH_VERSION = '0.0.1'
+    PUBLISH_GROUP_ID = 'com.github.tkuenneth'
+    PUBLISH_VERSION = '0.0.2'
     PUBLISH_ARTIFACT_ID = 'compose_adaptive_scaffold'
 }
 
