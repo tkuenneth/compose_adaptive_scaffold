@@ -1,10 +1,20 @@
 # Welcome to compose_adaptive_scaffold
 
 The aim of this repository is to make writing Jetpack Compose apps that
-support large screens and foldables a breeze. Here's a short clip that showcases how the
-library works (clicking on the preview image directs you to YouTube):
+support large screen and foldable devices a breeze. Here's a short clip that showcases how the
+library works. Clicking on the preview image directs you to YouTube.
 
 [![Watch the video](https://img.youtube.com/vi/3ryCurTOXVI/mqdefault.jpg)](https://youtu.be/3ryCurTOXVI)
+
+*compose_adaptive_scaffold* is based on the idea of two panes, called *body* and *secondary 
+body*. For small screens you pass alternatives called *small body* and *small secondary body*. 
+The latter one is optional. Two panes are the basis for *Canonical Layouts*, an important 
+Material Design concept.
+
+Under the hood, *compose_adaptive_scaffold* uses *Jetpack WindowManager* to provide full hinge 
+support. This means that you do not need to worry about screen dimensions, location and sizes of 
+hinges, and hinge features like orientation. Just provide *body* and *secondary body* 
+composables - everything else is handled by *compose_adaptive_scaffold*.
 
 ### Setup
 
@@ -13,7 +23,7 @@ implementation dependency:
 
 ```groovy
 dependencies {
-    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.0.2"
+    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.0.3"
 }
 ```
 
@@ -27,10 +37,10 @@ The library uses this configuration:
 
 Used libraries:
 
-| Name | Version |
-| -------- | ------- |
+| Name | Version        |
+| -------- |----------------|
 | *Jetpack WindowManager* | `1.1.0-beta02` |
-| *Jetpack Compose BOM* | `2023.03.00` |
+| *Jetpack Compose BOM* | `2023.04.01`   |
 
 ### How to use
 
@@ -100,6 +110,12 @@ and *small secondary body* are shown. If the device has a hinge, all features of
 including its location, size, and orientation are honored.
 
 Please note that *small secondary body* is optional.
+
+#### Additional parameters
+
+You can pass a top app bar. This composable will be shown if the vertical window size class is 
+not compact. Rotating a smartphone to landscape mode often leads to a compact vertical window 
+size class.
 
 ### Acknowledgements
 

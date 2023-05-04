@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.ExperimentalWindowApi
+import androidx.window.core.layout.WindowHeightSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
@@ -59,6 +60,7 @@ fun Activity.AdaptiveScaffold(
     index: Int,
     onSelectedIndexChange: (Int) -> Unit,
     destinations: List<NavigationDestination>,
+    topBar: @Composable () -> Unit = {},
     body: @Composable () -> Unit,
     smallBody: @Composable () -> Unit,
     secondaryBody: @Composable () -> Unit,
@@ -77,7 +79,14 @@ fun Activity.AdaptiveScaffold(
     val hasBottomBar =
         foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
     val hasNavigationRail = !hasBottomBar && !hasDrawer
+    val showTopAppBar =
+        foldDef.windowSizeClass.windowHeightSizeClass != WindowHeightSizeClass.COMPACT
     Scaffold(
+        topBar = {
+            if (showTopAppBar) {
+                topBar()
+            }
+        },
         bottomBar = {
             AdaptiveScaffoldBottomBar(
                 hasBottomBar = hasBottomBar,
