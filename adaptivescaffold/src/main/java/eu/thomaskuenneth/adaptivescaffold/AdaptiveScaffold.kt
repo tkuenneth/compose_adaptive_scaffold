@@ -31,7 +31,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +55,13 @@ data class NavigationDestination(
     val enabled: Boolean = true,
     val alwaysShowLabel: Boolean = true,
 )
+
+data class WindowSizeClass(
+    val widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.COMPACT,
+    val heightSizeClass: WindowHeightSizeClass = WindowHeightSizeClass.COMPACT
+)
+
+val LocalWindowSizeClass = compositionLocalOf { WindowSizeClass() }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalWindowApi::class)
 @Composable
@@ -82,34 +91,40 @@ fun Activity.AdaptiveScaffold(
     val hasNavigationRail = !hasBottomBar && !hasDrawer
     val showTopAppBar =
         foldDef.windowSizeClass.windowHeightSizeClass != WindowHeightSizeClass.COMPACT
-    Scaffold(
-        topBar = {
-            if (showTopAppBar) {
-                topBar()
+    val windowSizeClass = WindowSizeClass(
+        widthSizeClass = foldDef.windowSizeClass.windowWidthSizeClass,
+        heightSizeClass = foldDef.windowSizeClass.windowHeightSizeClass
+    )
+    CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+        Scaffold(
+            topBar = {
+                if (showTopAppBar) {
+                    topBar()
+                }
+            },
+            bottomBar = {
+                AdaptiveScaffoldBottomBar(
+                    hasBottomBar = hasBottomBar,
+                    index = index,
+                    onSelectedIndexChange = onSelectedIndexChange,
+                    destinations = destinations
+                )
             }
-        },
-        bottomBar = {
-            AdaptiveScaffoldBottomBar(
-                hasBottomBar = hasBottomBar,
+        ) { padding ->
+            AdaptiveScaffoldContent(
+                foldDef = foldDef,
+                paddingValues = padding,
+                hasNavigationRail = hasNavigationRail,
+                hasDrawer = hasDrawer,
                 index = index,
                 onSelectedIndexChange = onSelectedIndexChange,
-                destinations = destinations
+                destinations = destinations,
+                body = body,
+                smallBody = smallBody,
+                secondaryBody = secondaryBody,
+                smallSecondaryBody = smallSecondaryBody
             )
         }
-    ) { padding ->
-        AdaptiveScaffoldContent(
-            foldDef = foldDef,
-            paddingValues = padding,
-            hasNavigationRail = hasNavigationRail,
-            hasDrawer = hasDrawer,
-            index = index,
-            onSelectedIndexChange = onSelectedIndexChange,
-            destinations = destinations,
-            body = body,
-            smallBody = smallBody,
-            secondaryBody = secondaryBody,
-            smallSecondaryBody = smallSecondaryBody
-        )
     }
 }
 

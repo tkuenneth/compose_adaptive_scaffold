@@ -110,6 +110,9 @@ Depending on the app window size, either *body* and *secondary body* or *small b
 and *small secondary body* are shown. If the device has a hinge, all features of the hinge
 including its location, size, and orientation are honored.
 
+Inside your composable functions, you can use `LocalWindowSizeClass.current` to find out the 
+current window size classes.
+
 #### Additional parameters
 
 `topBar`: this composable will be shown if the vertical window size class is 
