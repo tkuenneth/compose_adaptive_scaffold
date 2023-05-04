@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -37,6 +39,7 @@ import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
 import eu.thomaskuenneth.adaptivescaffold.NavigationDestination
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 class AdaptiveScaffoldDemoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,7 +90,14 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                                 smallSecondaryBody = if (showSmallSecondaryBody) {
                                     { SmallSecondaryBody() }
                                 } else
-                                    null
+                                    null,
+                                topBar = {
+                                    TopAppBar(
+                                        title = {
+                                            Text(text = stringResource(id = R.string.app_name))
+                                        }
+                                    )
+                                }
                             )
                         },
                         colorScheme = defaultColorScheme()

@@ -28,6 +28,7 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -111,15 +112,6 @@ fun Activity.AdaptiveScaffold(
         )
     }
 }
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun MyTopBar(hasTopBar: Boolean) {
-//    if (hasTopBar)
-//        TopAppBar(title = {
-//            Text(stringResource(id = R.string.app_name))
-//        })
-//}
 
 @Composable
 private fun AdaptiveScaffoldBottomBar(
@@ -241,11 +233,7 @@ private fun AdaptiveScaffoldContent(
                 onSelectedIndexChange = onSelectedIndexChange,
                 destinations = destinations,
             )
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues = paddingValues)
-            ) {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 if (foldDef.hasFold) {
                     FoldableScreen(
                         foldDef = foldDef,
@@ -268,13 +256,19 @@ private fun AdaptiveScaffoldContent(
             }
         }
     }
-    AdaptiveScaffoldDrawer(
-        hasDrawer = hasDrawer,
-        index = index,
-        onSelectedIndexChange = onSelectedIndexChange,
-        destinations = destinations,
-        content = content
-    )
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues = paddingValues)
+    ) {
+        AdaptiveScaffoldDrawer(
+            hasDrawer = hasDrawer,
+            index = index,
+            onSelectedIndexChange = onSelectedIndexChange,
+            destinations = destinations,
+            content = content
+        )
+    }
 }
 
 @Composable

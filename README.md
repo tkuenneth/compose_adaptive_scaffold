@@ -1,15 +1,16 @@
 # Welcome to compose_adaptive_scaffold
 
-The aim of this repository is to make writing Jetpack Compose apps that
+The aim of this library is to make writing Jetpack Compose apps that
 support large screen and foldable devices a breeze. Here's a short clip that showcases how the
 library works. Clicking on the preview image directs you to YouTube.
 
 [![Watch the video](https://img.youtube.com/vi/3ryCurTOXVI/mqdefault.jpg)](https://youtu.be/3ryCurTOXVI)
 
-*compose_adaptive_scaffold* is based on the idea of two panes, called *body* and *secondary 
-body*. For small screens you pass alternatives called *small body* and *small secondary body*. 
-The latter one is optional. Two panes are the basis for *Canonical Layouts*, an important 
-Material Design concept.
+*compose_adaptive_scaffold* is based on the idea of two panes, called *body* and *secondary body*.
+For small screens you pass alternatives (or variations) called *small body* and *small secondary
+body* (the latter one is optional). Depending on your screen layout, the pairs *body* and *small
+body*, and *secondary body* and *small secondary body* may even be the same. Two panes are the basis
+for *Canonical Layouts*, an important Material Design concept.
 
 Under the hood, *compose_adaptive_scaffold* uses *Jetpack WindowManager* to provide full hinge 
 support. This means that you do not need to worry about screen dimensions, location and sizes of 
@@ -23,7 +24,7 @@ implementation dependency:
 
 ```groovy
 dependencies {
-    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.0.3"
+    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.0.4"
 }
 ```
 
@@ -98,24 +99,22 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
 }
 ```
 
-The `AdaptiveScaffold()` receives four composables:
+The `AdaptiveScaffold()` receives four main composable functions:
 
 1. a body
 2. a secondary body
 3. a small body
-4. a small secondary body
+4. a small secondary body (optional)
 
 Depending on the app window size, either *body* and *secondary body* or *small body*
 and *small secondary body* are shown. If the device has a hinge, all features of the hinge
 including its location, size, and orientation are honored.
 
-Please note that *small secondary body* is optional.
-
 #### Additional parameters
 
-You can pass a top app bar. This composable will be shown if the vertical window size class is 
-not compact. Rotating a smartphone to landscape mode often leads to a compact vertical window 
-size class.
+`topBar`: this composable will be shown if the vertical window size class is 
+not compact. Rotating a smartphone into landscape mode often leads to a compact vertical window 
+size class (so in this case the top app bar will not be visible=.
 
 ### Acknowledgements
 
