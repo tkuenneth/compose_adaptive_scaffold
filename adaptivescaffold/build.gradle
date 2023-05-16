@@ -5,7 +5,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'com.github.tkuenneth'
-    PUBLISH_VERSION = '0.0.5'
+    PUBLISH_VERSION = '0.0.6'
     PUBLISH_ARTIFACT_ID = 'compose_adaptive_scaffold'
 }
 
@@ -45,8 +45,12 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.window:window-core:1.1.0-beta02'
-    implementation "androidx.window:window:1.1.0-beta02"
+    api("androidx.window:window:1.1.0-rc01") {
+        transitive = true
+    }
+    api('androidx.window:window-core:1.1.0-rc01') {
+        transitive = true
+    }
 
     def composeBom = platform('androidx.compose:compose-bom:2023.04.01')
     implementation composeBom
@@ -57,9 +61,9 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
-    implementation 'androidx.core:core-ktx:1.10.0'
+    implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
     implementation 'androidx.activity:activity-compose:1.7.1'
 }
