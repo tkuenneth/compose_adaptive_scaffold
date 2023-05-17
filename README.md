@@ -4,7 +4,7 @@ The aim of this library is to make writing Jetpack Compose apps that
 support large screen and foldable devices a breeze. Here's a short clip that showcases how the
 library works. Clicking on the preview image directs you to YouTube.
 
-[![Watch the video](https://img.youtube.com/vi/3ryCurTOXVI/mqdefault.jpg)](https://youtu.be/3ryCurTOXVI)
+[![Watch the video](https://img.youtube.com/vi/nJDmJ0mmpys/mqdefault.jpg)](https://youtu.be/nJDmJ0mmpys)
 
 *compose_adaptive_scaffold* is based on the idea of two panes, called *body* and *secondary body*.
 For small screens you pass alternatives (or variations) called *small body* and *small secondary
