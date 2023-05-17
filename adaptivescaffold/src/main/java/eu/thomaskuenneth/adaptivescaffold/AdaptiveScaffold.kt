@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
-
 package eu.thomaskuenneth.adaptivescaffold
 
 import android.app.Activity
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -63,13 +60,13 @@ data class WindowSizeClass(
 
 val LocalWindowSizeClass = compositionLocalOf { WindowSizeClass() }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalWindowApi::class)
+@OptIn(ExperimentalWindowApi::class)
 @Composable
 fun Activity.AdaptiveScaffold(
-    useDrawer: Boolean,
-    index: Int,
+    useDrawer: Boolean = false,
+    index: Int = -1,
     onSelectedIndexChange: (Int) -> Unit,
-    destinations: List<NavigationDestination>,
+    destinations: List<NavigationDestination> = emptyList(),
     topBar: @Composable () -> Unit = {},
     body: @Composable () -> Unit,
     smallBody: @Composable () -> Unit,

@@ -24,7 +24,7 @@ implementation dependency:
 
 ```groovy
 dependencies {
-    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.0.5"
+    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.0.7"
 }
 ```
 
@@ -38,10 +38,10 @@ The library uses this configuration:
 
 Used libraries:
 
-| Name | Version        |
-| -------- |----------------|
-| *Jetpack WindowManager* | `1.1.0-beta02` |
-| *Jetpack Compose BOM* | `2023.04.01`   |
+| Name | Version      |
+| -------- |--------------|
+| *Jetpack WindowManager* | `1.1.0-rc01` |
+| *Jetpack Compose BOM* | `2023.05.01` |
 
 ### How to use
 
@@ -107,7 +107,31 @@ The `AdaptiveScaffold()` receives four main composable functions:
 4. a small secondary body (optional)
 
 Depending on the app window size, either *body* and *secondary body* or *small body*
-and *small secondary body* are shown. If the device has a hinge, all features of the hinge
+and *small secondary body* are shown. Take a look. This is what *compose_adaptive_scaffold* does:
+
+```kotlin
+if (foldDef.hasFold) {
+    FoldableScreen(
+        foldDef = foldDef,
+        body = body,
+        secondaryBody = secondaryBody,
+    )
+} else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
+    TwoPaneScreen(
+        firstPane = body,
+        secondPane = secondaryBody,
+        maxWidth = maxWidth
+    )
+} else {
+    TwoPaneScreen(
+        firstPane = smallBody,
+        secondPane = smallSecondaryBody,
+        maxWidth = maxWidth
+    )
+}
+```
+
+If the device has a hinge, all features of the hinge
 including its location, size, and orientation are honored.
 
 Inside your composable functions, you can use `LocalWindowSizeClass.current` to find out the 
