@@ -86,8 +86,6 @@ fun Activity.AdaptiveScaffold(
     val hasBottomBar =
         foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
     val hasNavigationRail = !hasBottomBar && !hasDrawer
-    val showTopAppBar =
-        foldDef.windowSizeClass.windowHeightSizeClass != WindowHeightSizeClass.COMPACT
     val windowSizeClass = WindowSizeClass(
         widthSizeClass = foldDef.windowSizeClass.windowWidthSizeClass,
         heightSizeClass = foldDef.windowSizeClass.windowHeightSizeClass
@@ -95,9 +93,7 @@ fun Activity.AdaptiveScaffold(
     CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
         Scaffold(
             topBar = {
-                if (showTopAppBar) {
-                    topBar()
-                }
+                topBar()
             },
             bottomBar = {
                 AdaptiveScaffoldBottomBar(

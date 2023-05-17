@@ -8,11 +8,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -23,6 +26,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,6 +53,7 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                     var index by rememberSaveable { mutableStateOf(0) }
                     var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
                     var showDestinations by rememberSaveable { mutableStateOf(true) }
+                    var moreOpen by remember { mutableStateOf(false) }
                     val destinations = listOf(
                         NavigationDestination(
                             icon = R.drawable.ic_android_black_24dp,
@@ -63,9 +68,6 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                             label = R.string.three
                         ),
                     )
-                    val toggleDestinations = {
-                        showDestinations = !showDestinations
-                    }
                     MaterialTheme(
                         content = {
                             AdaptiveScaffold(
@@ -74,17 +76,10 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                                 onSelectedIndexChange = { i -> index = i },
                                 destinations = if (showDestinations) destinations else emptyList(),
                                 body = {
-                                    Body(
-                                        onClickShowDestinations = toggleDestinations
-                                    )
+                                    Body()
                                 },
                                 smallBody = {
-                                    SmallBody(
-                                        onClickShowSmallSecondaryBody = {
-                                            showSmallSecondaryBody = !showSmallSecondaryBody
-                                        },
-                                        onClickShowDestinations = toggleDestinations
-                                    )
+                                    SmallBody()
                                 },
                                 secondaryBody = { SecondaryBody() },
                                 smallSecondaryBody = if (showSmallSecondaryBody) {
@@ -95,9 +90,34 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                                     TopAppBar(
                                         title = {
                                             Text(text = stringResource(id = R.string.app_name))
+                                        },
+                                        actions = {
+                                            IconButton(
+                                                onClick = {
+                                                    moreOpen = true
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.MoreVert,
+                                                    contentDescription = stringResource(id = R.string.options_menu)
+                                                )
+                                            }
+                                            DropDownMenu(
+                                                expanded = moreOpen,
+                                                onDismissRequest = { moreOpen = false },
+                                                showDestinationsClicked = {
+                                                    showDestinations = !showDestinations
+                                                    moreOpen = false
+                                                },
+                                                showSmallSecondaryBodyClicked = {
+                                                    showSmallSecondaryBody =
+                                                        !showSmallSecondaryBody
+                                                    moreOpen = false
+                                                }
+                                            )
                                         }
                                     )
-                                }
+                                },
                             )
                         },
                         colorScheme = defaultColorScheme()
@@ -118,6 +138,7 @@ private fun defaultColorScheme() = with(isSystemInDarkTheme()) {
         } else {
             darkColorScheme()
         }
+
         false -> if (hasDynamicColor) {
             dynamicLightColorScheme(context)
         } else {
@@ -127,56 +148,29 @@ private fun defaultColorScheme() = with(isSystemInDarkTheme()) {
 }
 
 @Composable
-private fun Body(
-    onClickShowDestinations: () -> Unit
-) {
+private fun Body() {
     Box(modifier = Modifier.fillMaxSize()) {
         ColoredBoxWithText(
             modifier = Modifier
                 .fillMaxSize(),
-            color = Color.Red,
-            text = stringResource(id = R.string.body)
+            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+            text = stringResource(id = R.string.body),
+            textColor = MaterialTheme.colorScheme.onPrimaryContainer
         )
-        Button(
-            modifier = Modifier.padding(top = 32.dp, start = 32.dp),
-            onClick = onClickShowDestinations
-        ) {
-            Text(
-                text = stringResource(id = R.string.toggle_destinations)
-            )
-        }
     }
 }
 
 @Composable
 private fun SmallBody(
-    onClickShowSmallSecondaryBody: () -> Unit,
-    onClickShowDestinations: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         ColoredBoxWithText(
             modifier = Modifier
                 .fillMaxSize(),
-            color = Color.Yellow,
-            text = stringResource(id = R.string.small_body)
+            backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+            text = stringResource(id = R.string.small_body),
+            textColor = MaterialTheme.colorScheme.onPrimaryContainer
         )
-        Column(modifier = Modifier.padding(32.dp)) {
-            Button(
-                onClick = onClickShowSmallSecondaryBody
-            ) {
-                Text(
-                    text = stringResource(id = R.string.toggle_small_secondary_body)
-                )
-            }
-            Button(
-                modifier = Modifier.padding(top = 16.dp),
-                onClick = onClickShowDestinations
-            ) {
-                Text(
-                    text = stringResource(id = R.string.toggle_destinations)
-                )
-            }
-        }
     }
 }
 
@@ -185,8 +179,9 @@ private fun SecondaryBody() {
     ColoredBoxWithText(
         modifier = Modifier
             .fillMaxSize(),
-        color = Color.Green,
-        text = stringResource(id = R.string.secondary_body)
+        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+        text = stringResource(id = R.string.secondary_body),
+        textColor = MaterialTheme.colorScheme.onSecondaryContainer
     )
 }
 
@@ -195,27 +190,60 @@ private fun SmallSecondaryBody() {
     ColoredBoxWithText(
         modifier = Modifier
             .fillMaxSize(),
-        color = Color.Blue,
-        text = stringResource(id = R.string.small_secondary_body)
+        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+        text = stringResource(id = R.string.small_secondary_body),
+        textColor = MaterialTheme.colorScheme.onSecondaryContainer
     )
 }
 
 @Composable
 private fun ColoredBoxWithText(
     modifier: Modifier,
-    color: Color,
-    text: String
+    backgroundColor: Color,
+    text: String,
+    textColor: Color
 ) {
     Box(
         modifier = modifier
-            .background(color)
-            .border(1.dp, Color.White),
+            .background(backgroundColor)
+            .border(1.dp, MaterialTheme.colorScheme.primary),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = textColor
+        )
+    }
+}
+
+@Composable
+private fun DropDownMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    showDestinationsClicked: () -> Unit,
+    showSmallSecondaryBodyClicked: () -> Unit
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest
+    ) {
+        DropdownMenuItem(
+            onClick = showDestinationsClicked,
+            text = {
+                Text(
+                    text = stringResource(id = R.string.toggle_destinations)
+                )
+            }
+        )
+        DropdownMenuItem(
+            onClick = showSmallSecondaryBodyClicked,
+            text = {
+                Text(
+                    text = stringResource(id = R.string.toggle_small_secondary_body)
+                )
+            }
         )
     }
 }

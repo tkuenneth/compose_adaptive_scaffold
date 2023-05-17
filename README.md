@@ -139,9 +139,7 @@ current window size classes.
 
 #### Additional parameters
 
-`topBar`: this composable will be shown if the vertical window size class is 
-not compact. Rotating a smartphone into landscape mode often leads to a compact vertical window 
-size class (so in this case the top app bar will not be visible=.
+`topBar`: this composable will be passed to `Scaffold()` as the `topBar` parameter.
 
 ### Acknowledgements
 

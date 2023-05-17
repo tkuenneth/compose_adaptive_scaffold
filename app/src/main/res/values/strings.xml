@@ -10,6 +10,7 @@
     <string name="secondary_body">secondary body</string>
     <string name="small_secondary_body">small secondary body</string>
 
+    <string name="options_menu">Options menu</string>
     <string name="toggle_small_secondary_body">Toggle small secondary body</string>
     <string name="toggle_destinations">Toggle destinations</string>
 
