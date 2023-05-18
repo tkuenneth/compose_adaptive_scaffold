@@ -17,6 +17,11 @@ support. This means that you do not need to worry about screen dimensions, locat
 hinges, and hinge features like orientation. Just provide *body* and *secondary body* 
 composables - everything else is handled by *compose_adaptive_scaffold*.
 
+<img src="./docs/Duo_01.jpg" width="15%" valign="top" alt="Picture of Microsoft Surface Duo portrait folded" />
+<img src="./docs/Duo_02.jpg" width="22%" valign="top" alt="Picture of Microsoft Surface Duo landscape folded" />
+<img src="./docs/Duo_03.jpg" width="30%" valign="top" alt="Picture of Microsoft Surface Duo portrait opened" />
+<img src="./docs/Duo_04.jpg" width="25%" valign="top" alt="Picture of Microsoft Surface Duo landscape opened" />
+
 ### Setup
 
 The library is available through Maven Central. To include it in your apps, just add an
