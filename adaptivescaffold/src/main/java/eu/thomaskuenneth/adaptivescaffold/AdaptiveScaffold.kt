@@ -65,7 +65,7 @@ val LocalWindowSizeClass = compositionLocalOf { WindowSizeClass() }
 fun Activity.AdaptiveScaffold(
     useDrawer: Boolean = false,
     index: Int = -1,
-    onSelectedIndexChange: (Int) -> Unit,
+    onSelectedIndexChange: (Int) -> Unit = {},
     destinations: List<NavigationDestination> = emptyList(),
     topBar: @Composable () -> Unit = {},
     body: @Composable () -> Unit,

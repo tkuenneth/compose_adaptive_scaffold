@@ -1,12 +1,10 @@
 package eu.thomaskuenneth.adaptivescaffolddemo
 
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -19,10 +17,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,6 +34,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
 import eu.thomaskuenneth.adaptivescaffold.NavigationDestination
+import eu.thomaskuenneth.adaptivescaffold.defaultColorScheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -124,25 +118,6 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun defaultColorScheme() = with(isSystemInDarkTheme()) {
-    val hasDynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    val context = LocalContext.current
-    when (this) {
-        true -> if (hasDynamicColor) {
-            dynamicDarkColorScheme(context)
-        } else {
-            darkColorScheme()
-        }
-
-        false -> if (hasDynamicColor) {
-            dynamicLightColorScheme(context)
-        } else {
-            lightColorScheme()
         }
     }
 }
