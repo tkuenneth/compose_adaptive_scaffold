@@ -24,7 +24,7 @@ implementation dependency:
 
 ```groovy
 dependencies {
-    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.0.8"
+    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.0.9"
 }
 ```
 
@@ -33,7 +33,7 @@ The library uses this configuration:
 | Property | Value |
 | -------- | ------- |
 | `namespace` | `eu.thomaskuenneth.adaptivescaffold` |
-| `minSdk` | `28` |
+| `minSdk` | `21` |
 | `targetSdk` | `33` |
 
 Used libraries:

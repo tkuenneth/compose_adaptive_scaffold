@@ -5,7 +5,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'com.github.tkuenneth'
-    PUBLISH_VERSION = '0.0.8'
+    PUBLISH_VERSION = '0.0.9'
     PUBLISH_ARTIFACT_ID = 'compose_adaptive_scaffold'
 }
 
@@ -15,7 +15,7 @@ android {
     namespace 'eu.thomaskuenneth.adaptivescaffold'
     compileSdk 33
     defaultConfig {
-        minSdk 28
+        minSdk 21
         targetSdk 33
         aarMetadata {
             minCompileSdk = 33

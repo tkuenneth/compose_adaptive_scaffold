@@ -71,7 +71,7 @@ fun Activity.AdaptiveScaffold(
     body: @Composable () -> Unit,
     smallBody: @Composable () -> Unit,
     secondaryBody: @Composable () -> Unit,
-    smallSecondaryBody: (@Composable () -> Unit)?
+    smallSecondaryBody: (@Composable () -> Unit)? = null
 ) {
     val context = LocalContext.current
     val layoutInfo by WindowInfoTracker.getOrCreate(context)
