@@ -242,7 +242,17 @@ private fun AdaptiveScaffoldContent(
                 destinations = destinations,
             )
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                if (foldDef.hasFold) {
+                if (
+                    foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT &&
+                    foldDef.foldOrientation == FoldingFeature.Orientation.HORIZONTAL &&
+                    (foldDef.occlusionType == FoldingFeature.OcclusionType.NONE || foldDef.foldHeight <= 4.dp)
+                ) {
+                    TwoPaneScreen(
+                        firstPane = smallBody,
+                        secondPane = smallSecondaryBody,
+                        maxWidth = maxWidth
+                    )
+                } else if (foldDef.hasFold) {
                     FoldableScreen(
                         foldDef = foldDef,
                         body = body,

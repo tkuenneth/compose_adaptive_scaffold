@@ -11,6 +11,8 @@ import androidx.window.layout.WindowMetrics
 data class FoldDef(
     val hasFold: Boolean,
     val foldOrientation: FoldingFeature.Orientation?,
+    val occlusionType: FoldingFeature.OcclusionType,
+    val isFoldSeparating: Boolean,
     val foldWidth: Dp,
     val foldHeight: Dp,
     val widthLeftOrTop: Dp,
@@ -27,6 +29,8 @@ fun createFoldDef(
     windowMetrics: WindowMetrics
 ): FoldDef {
     var foldOrientation: FoldingFeature.Orientation? = null
+    var isFoldSeparating = false
+    var foldOcclusionType = FoldingFeature.OcclusionType.NONE
     var widthLeftOrTop = 0
     var heightLeftOrTop = 0
     var widthRightOrBottom = 0
@@ -36,6 +40,8 @@ fun createFoldDef(
     layoutInfo?.displayFeatures?.forEach { displayFeature ->
         (displayFeature as FoldingFeature).run {
             foldOrientation = orientation
+            isFoldSeparating = isSeparating
+            foldOcclusionType = occlusionType
             if (orientation == FoldingFeature.Orientation.VERTICAL) {
                 widthLeftOrTop = bounds.left
                 heightLeftOrTop = windowMetrics.bounds.height()
@@ -54,6 +60,8 @@ fun createFoldDef(
     return with(LocalDensity.current) {
         FoldDef(
             foldOrientation = foldOrientation,
+            isFoldSeparating = isFoldSeparating,
+            occlusionType = foldOcclusionType,
             widthLeftOrTop = widthLeftOrTop.toDp(),
             heightLeftOrTop = heightLeftOrTop.toDp(),
             widthRightOrBottom = widthRightOrBottom.toDp(),
