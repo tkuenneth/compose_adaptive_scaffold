@@ -32,7 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.window.core.layout.WindowWidthSizeClass
 import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
+import eu.thomaskuenneth.adaptivescaffold.LocalWindowSizeClass
 import eu.thomaskuenneth.adaptivescaffold.NavigationDestination
 import eu.thomaskuenneth.adaptivescaffold.defaultColorScheme
 import kotlinx.coroutines.launch
@@ -212,13 +214,15 @@ private fun DropDownMenu(
                 )
             }
         )
-        DropdownMenuItem(
-            onClick = showSmallSecondaryBodyClicked,
-            text = {
-                Text(
-                    text = stringResource(id = R.string.toggle_small_secondary_body)
-                )
-            }
-        )
+        if (LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.COMPACT) {
+            DropdownMenuItem(
+                onClick = showSmallSecondaryBodyClicked,
+                text = {
+                    Text(
+                        text = stringResource(id = R.string.toggle_small_secondary_body)
+                    )
+                }
+            )
+        }
     }
 }

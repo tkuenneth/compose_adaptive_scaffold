@@ -5,7 +5,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'com.github.tkuenneth'
-    PUBLISH_VERSION = '0.1.0'
+    PUBLISH_VERSION = '0.1.1'
     PUBLISH_ARTIFACT_ID = 'compose_adaptive_scaffold'
 }
 
@@ -13,12 +13,12 @@ apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
 
 android {
     namespace 'eu.thomaskuenneth.adaptivescaffold'
-    compileSdk 33
+    compileSdk 34
     defaultConfig {
-        minSdk 21
-        targetSdk 33
+        minSdk 24
+        targetSdk 34
         aarMetadata {
-            minCompileSdk = 33
+            minCompileSdk = 34
         }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -45,10 +45,10 @@ android {
 }
 
 dependencies {
-    api("androidx.window:window:1.1.0-rc01") {
+    api("androidx.window:window:1.2.0-alpha03") {
         transitive = true
     }
-    api('androidx.window:window-core:1.1.0-rc01') {
+    api('androidx.window:window-core:1.2.0-alpha03') {
         transitive = true
     }
 

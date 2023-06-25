@@ -31,24 +31,24 @@ implementation dependency:
 
 ```groovy
 dependencies {
-    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.1.0"
+    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.1.1"
 }
 ```
 
 The library uses this configuration:
 
-| Property | Value |
-| -------- | ------- |
+| Property | Value                                |
+| -------- |--------------------------------------|
 | `namespace` | `eu.thomaskuenneth.adaptivescaffold` |
-| `minSdk` | `21` |
-| `targetSdk` | `33` |
+| `minSdk` | `24`                                 |
+| `targetSdk` | `34`                                 |
 
 Used libraries:
 
-| Name | Version      |
-| -------- |--------------|
-| *Jetpack WindowManager* | `1.1.0-rc01` |
-| *Jetpack Compose BOM* | `2023.05.01` |
+| Name | Version         |
+| -------- |-----------------|
+| *Jetpack WindowManager* | `1.2.0-alpha03` |
+| *Jetpack Compose BOM* | `2023.05.01`    |
 
 ### How to use
 
