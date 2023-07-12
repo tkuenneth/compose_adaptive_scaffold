@@ -34,7 +34,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.core.layout.WindowWidthSizeClass
 import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
-import eu.thomaskuenneth.adaptivescaffold.LocalWindowSizeClass
+import eu.thomaskuenneth.adaptivescaffold.LocalFoldDef
 import eu.thomaskuenneth.adaptivescaffold.NavigationDestination
 import eu.thomaskuenneth.adaptivescaffold.defaultColorScheme
 import kotlinx.coroutines.launch
@@ -202,7 +202,7 @@ private fun AdaptiveScaffoldDemoDropDownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
     ) {
-        if (LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.COMPACT) {
+        if (LocalFoldDef.current.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT) {
             DropdownMenuItem(
                 onClick = showSmallSecondaryBodyClicked,
                 text = {

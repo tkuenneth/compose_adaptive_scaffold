@@ -42,7 +42,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowHeightSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
@@ -60,12 +59,7 @@ data class NavigationDestination(
     val smallSecondaryBody: (@Composable () -> Unit)? = null
 )
 
-data class WindowSizeClass(
-    val widthSizeClass: WindowWidthSizeClass = WindowWidthSizeClass.COMPACT,
-    val heightSizeClass: WindowHeightSizeClass = WindowHeightSizeClass.COMPACT
-)
-
-val LocalWindowSizeClass = compositionLocalOf { WindowSizeClass() }
+val LocalFoldDef = compositionLocalOf { FoldDef() }
 
 @Composable
 fun Activity.AdaptiveScaffold(
@@ -118,11 +112,7 @@ fun Activity.AdaptiveScaffold(
     val hasBottomBar =
         foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
     val hasNavigationRail = !hasBottomBar && !hasDrawer
-    val windowSizeClass = WindowSizeClass(
-        widthSizeClass = foldDef.windowSizeClass.windowWidthSizeClass,
-        heightSizeClass = foldDef.windowSizeClass.windowHeightSizeClass
-    )
-    CompositionLocalProvider(LocalWindowSizeClass provides windowSizeClass) {
+    CompositionLocalProvider(LocalFoldDef provides foldDef) {
         Scaffold(
             topBar = {
                 topBar()

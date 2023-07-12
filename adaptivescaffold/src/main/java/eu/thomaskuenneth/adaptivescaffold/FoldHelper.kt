@@ -3,24 +3,28 @@ package eu.thomaskuenneth.adaptivescaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowLayoutInfo
 import androidx.window.layout.WindowMetrics
 
 data class FoldDef(
-    val hasFold: Boolean,
-    val foldOrientation: FoldingFeature.Orientation?,
-    val occlusionType: FoldingFeature.OcclusionType,
-    val isFoldSeparating: Boolean,
-    val foldWidth: Dp,
-    val foldHeight: Dp,
-    val widthLeftOrTop: Dp,
-    val heightLeftOrTop: Dp,
-    val widthRightOrBottom: Dp,
-    val heightRightOrBottom: Dp,
-    val isPortrait: Boolean,
-    val windowSizeClass: WindowSizeClass,
+    val hasFold: Boolean = false,
+    val foldOrientation: FoldingFeature.Orientation? = null,
+    val occlusionType: FoldingFeature.OcclusionType = FoldingFeature.OcclusionType.NONE,
+    val isFoldSeparating: Boolean = false,
+    val foldWidth: Dp = 0.dp,
+    val foldHeight: Dp = 0.dp,
+    val widthLeftOrTop: Dp = 0.dp,
+    val heightLeftOrTop: Dp = 0.dp,
+    val widthRightOrBottom: Dp = 0.dp,
+    val heightRightOrBottom: Dp = 0.dp,
+    val isPortrait: Boolean = false,
+    val windowSizeClass: WindowSizeClass = WindowSizeClass.compute(
+        dpWidth = 0F,
+        dpHeight = 0F
+    )
 )
 
 @Composable

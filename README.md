@@ -24,6 +24,12 @@ composables - everything else is handled by *compose_adaptive_scaffold*.
 <img src="./docs/Duo_04.jpg" width="25%" valign="top" alt="Picture of Microsoft Surface Duo landscape opened" />
 </p>
 
+**Please note**
+
+Version `0.2.0` removes `LocalWindowSizeClass` in favor of the new `LocalFoldDef` `CompositionLocal`. Instead of writing,
+for example, `if (LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.COMPACT) {` you would now be using
+`if (LocalFoldDef.current.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT) {`.
+
 ### Setup
 
 The library is available through Maven Central. To include it in your apps, just add an
@@ -31,7 +37,7 @@ implementation dependency:
 
 ```groovy
 dependencies {
-    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.1.1"
+    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.2.0"
 }
 ```
 
@@ -56,97 +62,110 @@ Here's how the main activity of the sample app looks like:
 
 ```kotlin
 class AdaptiveScaffoldDemoActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                setContent {
-                    var index by rememberSaveable { mutableStateOf(0) }
-                    var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
-                    val destinations = listOf(
-                        NavigationDestination(
-                            icon = R.drawable.ic_android_black_24dp,
-                            label = R.string.one
-                        ),
-                        NavigationDestination(
-                            icon = R.drawable.ic_android_black_24dp,
-                            label = R.string.two
-                        ),
-                        NavigationDestination(
-                            icon = R.drawable.ic_android_black_24dp,
-                            label = R.string.three
-                        ),
-                    )
-                    MaterialTheme(
-                        content = {
-                            AdaptiveScaffold(
-                                useDrawer = true,
-                                index = index,
-                                onSelectedIndexChange = { i -> index = i },
-                                destinations = destinations,
-                                body = { Body() },
-                                smallBody = {
-                                    SmallBody {
-                                        showSmallSecondaryBody = !showSmallSecondaryBody
-                                    }
-                                },
-                                secondaryBody = { SecondaryBody() },
-                                smallSecondaryBody = if (showSmallSecondaryBody) {
-                                    { SmallSecondaryBody() }
-                                } else
-                                    null
-                            )
-                        },
-                        colorScheme = defaultColorScheme()
-                    )
-                }
-            }
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    lifecycleScope.launch {
+      lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+        setContent {
+          var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
+          MaterialTheme(
+            content = {
+              AdaptiveScaffold(
+                useDrawer = true,
+                startDestination = destinationOne(showSmallSecondaryBody),
+                otherDestinations = listOf(destinationFoldInfo),
+                topBar = {
+                  AdaptiveScaffoldDemoTopAppBar(
+                    showSmallSecondaryBodyClicked = {
+                      showSmallSecondaryBody =
+                        !showSmallSecondaryBody
+                    }
+                  )
+                },
+              )
+            },
+            colorScheme = defaultColorScheme()
+          )
         }
+      }
     }
+  }
 }
 ```
 
-The `AdaptiveScaffold()` receives four main composable functions:
+The two destinations are defined like this:
+
+```kotlin
+fun destinationOne(showSmallSecondaryBody: Boolean) = NavigationDestination(
+    icon = R.drawable.ic_android_black_24dp,
+    label = R.string.one,
+    body = {
+        Body()
+    },
+    smallBody = {
+        SmallBody()
+    },
+    secondaryBody = { SecondaryBody() },
+    smallSecondaryBody = if (showSmallSecondaryBody) {
+        { SmallSecondaryBody() }
+    } else null
+)
+
+val destinationFoldInfo = NavigationDestination(
+    icon = R.drawable.baseline_perm_device_information_24,
+    label = R.string.fold_info
+    ...
+)
+```
+
+Defining a destination as a function allows you to changes panes based on state.
+
+`NavigationDestination` receives an icon, a label, and four composable functions:
 
 1. a body
 2. a secondary body
 3. a small body
-4. a small secondary body (optional)
+4. a small secondary body (can be `null`)
 
-Depending on the app window size, either *body* and *secondary body* or *small body*
-and *small secondary body* are shown. Take a look. This is what *compose_adaptive_scaffold* does:
+Depending on the app window size, either *body* and *secondary body* **or** *small body*
+and *small secondary body* are shown. Take a look. This is what *compose_adaptive_scaffold* does under the hood:
 
 ```kotlin
-if (foldDef.hasFold) {
-    FoldableScreen(
-        foldDef = foldDef,
-        body = body,
-        secondaryBody = secondaryBody,
-    )
+if (
+  foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT &&
+  foldDef.foldOrientation == FoldingFeature.Orientation.HORIZONTAL &&
+  (foldDef.occlusionType == FoldingFeature.OcclusionType.NONE || foldDef.foldHeight <= 4.dp)
+) {
+  TwoPaneScreen(
+    firstPane = smallBody,
+    secondPane = smallSecondaryBody,
+    maxWidth = maxWidth
+  )
+} else if (foldDef.hasFold) {
+  FoldableScreen(
+    foldDef = foldDef,
+    body = body,
+    secondaryBody = secondaryBody,
+  )
 } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
-    TwoPaneScreen(
-        firstPane = body,
-        secondPane = secondaryBody,
-        maxWidth = maxWidth
-    )
+  TwoPaneScreen(
+    firstPane = body,
+    secondPane = secondaryBody,
+    maxWidth = maxWidth
+  )
 } else {
-    TwoPaneScreen(
-        firstPane = smallBody,
-        secondPane = smallSecondaryBody,
-        maxWidth = maxWidth
-    )
+  TwoPaneScreen(
+    firstPane = smallBody,
+    secondPane = smallSecondaryBody,
+    maxWidth = maxWidth
+  )
 }
 ```
 
-If the device has a hinge, all features of the hinge
-including its location, size, and orientation are honored.
+If the device has a hinge, all features of the hinge including its location, size, and orientation are honored.
 
-Inside your composable functions, you can use `LocalWindowSizeClass.current` to find out the 
-current window size classes.
-
-#### Additional parameters
-
-`topBar`: this composable will be passed to `Scaffold()` as the `topBar` parameter.
+Inside your composable functions, you can use `LocalFoldDef.current` to find out the 
+current window size classes and the configuration of the fold or hinge.
 
 ### Acknowledgements
 
