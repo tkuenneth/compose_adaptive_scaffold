@@ -27,7 +27,7 @@ composables - everything else is handled by *compose_adaptive_scaffold*.
 **Please note**
 
 Version `0.2.0` removes `LocalWindowSizeClass` in favor of the new `LocalFoldDef` `CompositionLocal`. Instead of writing,
-for example, `if (LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.COMPACT) {` you would now be using
+for example, `if (LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.COMPACT) {` you should now be using
 `if (LocalFoldDef.current.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT) {`.
 
 ### Setup
@@ -58,7 +58,9 @@ Used libraries:
 
 ### How to use
 
-Here's how the main activity of the sample app looks like:
+Here's how the main activity of the sample app looks like. The two states, `toggleSmallSecondaryBodyVisible`
+and `showSmallSecondaryBody` are used to show or hide a menu, so they are not strictly related to
+`AdaptiveScaffold()`.
 
 ```kotlin
 class AdaptiveScaffoldDemoActivity : ComponentActivity() {
@@ -67,6 +69,7 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
     lifecycleScope.launch {
       lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
         setContent {
+          var toggleSmallSecondaryBodyVisible by rememberSaveable { mutableStateOf(false) }
           var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
           MaterialTheme(
             content = {
@@ -74,11 +77,14 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                 useDrawer = true,
                 startDestination = destinationOne(showSmallSecondaryBody),
                 otherDestinations = listOf(destinationFoldInfo),
+                onDestinationChanged = {
+                  toggleSmallSecondaryBodyVisible = it != destinationFoldInfo
+                },
                 topBar = {
                   AdaptiveScaffoldDemoTopAppBar(
-                    showSmallSecondaryBodyClicked = {
-                      showSmallSecondaryBody =
-                        !showSmallSecondaryBody
+                    toggleSmallSecondaryBodyVisible = toggleSmallSecondaryBodyVisible,
+                    toggleSmallSecondaryBodyClicked = {
+                      showSmallSecondaryBody = !showSmallSecondaryBody
                     }
                   )
                 },
@@ -97,24 +103,24 @@ The two destinations are defined like this:
 
 ```kotlin
 fun destinationOne(showSmallSecondaryBody: Boolean) = NavigationDestination(
-    icon = R.drawable.ic_android_black_24dp,
-    label = R.string.one,
-    body = {
-        Body()
-    },
-    smallBody = {
-        SmallBody()
-    },
-    secondaryBody = { SecondaryBody() },
-    smallSecondaryBody = if (showSmallSecondaryBody) {
-        { SmallSecondaryBody() }
-    } else null
+  icon = R.drawable.ic_android_black_24dp,
+  label = R.string.one,
+  body = {
+    Body()
+  },
+  smallBody = {
+    SmallBody()
+  },
+  secondaryBody = { SecondaryBody() },
+  smallSecondaryBody = if (showSmallSecondaryBody) {
+    { SmallSecondaryBody() }
+  } else null
 )
 
 val destinationFoldInfo = NavigationDestination(
-    icon = R.drawable.baseline_perm_device_information_24,
-    label = R.string.fold_info
-    ...
+  icon = R.drawable.baseline_perm_device_information_24,
+  label = R.string.fold_info,
+  overlay = { FoldDefInfo() },
 )
 ```
 
@@ -128,44 +134,50 @@ Defining a destination as a function allows you to changes panes based on state.
 4. a small secondary body (can be `null`)
 
 Depending on the app window size, either *body* and *secondary body* **or** *small body*
-and *small secondary body* are shown. Take a look. This is what *compose_adaptive_scaffold* does under the hood:
-
-```kotlin
-if (
-  foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT &&
-  foldDef.foldOrientation == FoldingFeature.Orientation.HORIZONTAL &&
-  (foldDef.occlusionType == FoldingFeature.OcclusionType.NONE || foldDef.foldHeight <= 4.dp)
-) {
-  TwoPaneScreen(
-    firstPane = smallBody,
-    secondPane = smallSecondaryBody,
-    maxWidth = maxWidth
-  )
-} else if (foldDef.hasFold) {
-  FoldableScreen(
-    foldDef = foldDef,
-    body = body,
-    secondaryBody = secondaryBody,
-  )
-} else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
-  TwoPaneScreen(
-    firstPane = body,
-    secondPane = secondaryBody,
-    maxWidth = maxWidth
-  )
-} else {
-  TwoPaneScreen(
-    firstPane = smallBody,
-    secondPane = smallSecondaryBody,
-    maxWidth = maxWidth
-  )
-}
-```
-
-If the device has a hinge, all features of the hinge including its location, size, and orientation are honored.
+and *small secondary body* are shown. If the device has a hinge, all features of the hinge including
+its location, size, and orientation are honored.
 
 Inside your composable functions, you can use `LocalFoldDef.current` to find out the 
 current window size classes and the configuration of the fold or hinge.
+
+```kotlin
+@Composable
+private fun FoldDefInfo() {
+  with(LocalFoldDef.current) {
+    LazyColumn(
+      contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+      item {
+        FoldDefInfoItem("isSeparating", isSeparating.toString())
+        FoldDefInfoItem("orientation", orientation.toString())
+        FoldDefInfoItem("occlusionType", occlusionType.toString())
+        VerticalSpacer()
+        FoldDefInfoItem(
+          "windowWidthSizeClass",
+          windowSizeClass.windowWidthSizeClass.toString().lastPart()
+        )
+        FoldDefInfoItem(
+          "windowHeightSizeClass",
+          windowSizeClass.windowHeightSizeClass.toString().lastPart()
+        )
+        VerticalSpacer()
+        FoldDefInfoItem("foldWidth", foldWidth.toString())
+        FoldDefInfoItem("foldHeight", foldHeight.toString())
+        VerticalSpacer()
+        FoldDefInfoItem("widthLeftOrTop", widthLeftOrTop.toString())
+        FoldDefInfoItem("heightLeftOrTop", heightLeftOrTop.toString())
+        VerticalSpacer()
+        FoldDefInfoItem("widthRightOrBottom", widthRightOrBottom.toString())
+        FoldDefInfoItem("heightRightOrBottom", heightRightOrBottom.toString())
+      }
+    }
+  }
+}
+```
+
+Here's something interesting: if you want to show something that should span the two panes,
+you can pass a `overlay` composable to `NavigationDestination`. Please have a look at `destinationFoldInfo` to
+see how that works. In this example the two panes are empty, so the overlay becomes the main content.
 
 ### Acknowledgements
 

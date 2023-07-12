@@ -6,7 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
@@ -28,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -56,7 +63,8 @@ fun destinationOne(showSmallSecondaryBody: Boolean) = NavigationDestination(
 
 val destinationFoldInfo = NavigationDestination(
     icon = R.drawable.baseline_perm_device_information_24,
-    label = R.string.fold_info
+    label = R.string.fold_info,
+    overlay = { FoldDefInfo() },
 )
 
 class AdaptiveScaffoldDemoActivity : ComponentActivity() {
@@ -65,6 +73,7 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 setContent {
+                    var toggleSmallSecondaryBodyVisible by rememberSaveable { mutableStateOf(false) }
                     var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
                     MaterialTheme(
                         content = {
@@ -72,11 +81,14 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                                 useDrawer = true,
                                 startDestination = destinationOne(showSmallSecondaryBody),
                                 otherDestinations = listOf(destinationFoldInfo),
+                                onDestinationChanged = {
+                                    toggleSmallSecondaryBodyVisible = it != destinationFoldInfo
+                                },
                                 topBar = {
                                     AdaptiveScaffoldDemoTopAppBar(
-                                        showSmallSecondaryBodyClicked = {
-                                            showSmallSecondaryBody =
-                                                !showSmallSecondaryBody
+                                        toggleSmallSecondaryBodyVisible = toggleSmallSecondaryBodyVisible,
+                                        toggleSmallSecondaryBodyClicked = {
+                                            showSmallSecondaryBody = !showSmallSecondaryBody
                                         }
                                     )
                                 },
@@ -92,31 +104,54 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdaptiveScaffoldDemoTopAppBar(showSmallSecondaryBodyClicked: () -> Unit) {
+fun AdaptiveScaffoldDemoTopAppBar(
+    toggleSmallSecondaryBodyClicked: () -> Unit,
+    toggleSmallSecondaryBodyVisible: Boolean
+) {
     var moreOpen by remember { mutableStateOf(false) }
+    val menuItems = mutableListOf<@Composable () -> Unit>()
+    if ((toggleSmallSecondaryBodyVisible) &&
+        (LocalFoldDef.current.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT)
+    ) {
+        menuItems.add {
+            DropdownMenuItem(
+                onClick = {
+                    toggleSmallSecondaryBodyClicked()
+                    moreOpen = false
+                },
+                text = {
+                    Text(
+                        text = stringResource(id = R.string.toggle_small_secondary_body)
+                    )
+                }
+            )
+        }
+    }
     TopAppBar(
         title = {
             Text(text = stringResource(id = R.string.app_name))
         },
         actions = {
-            IconButton(
-                onClick = {
-                    moreOpen = true
+            if (menuItems.isNotEmpty()) {
+                IconButton(
+                    onClick = {
+                        moreOpen = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(id = R.string.options_menu)
+                    )
                 }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = stringResource(id = R.string.options_menu)
-                )
+                DropdownMenu(
+                    expanded = moreOpen,
+                    onDismissRequest = { moreOpen = false }
+                ) {
+                    menuItems.forEach {
+                        it()
+                    }
+                }
             }
-            AdaptiveScaffoldDemoDropDownMenu(
-                expanded = moreOpen,
-                onDismissRequest = { moreOpen = false },
-                showSmallSecondaryBodyClicked = {
-                    showSmallSecondaryBodyClicked()
-                    moreOpen = false
-                }
-            )
         }
     )
 }
@@ -193,24 +228,66 @@ private fun ColoredBoxWithText(
 }
 
 @Composable
-private fun AdaptiveScaffoldDemoDropDownMenu(
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    showSmallSecondaryBodyClicked: () -> Unit
-) {
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest
-    ) {
-        if (LocalFoldDef.current.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT) {
-            DropdownMenuItem(
-                onClick = showSmallSecondaryBodyClicked,
-                text = {
-                    Text(
-                        text = stringResource(id = R.string.toggle_small_secondary_body)
-                    )
-                }
-            )
+private fun FoldDefInfo() {
+    with(LocalFoldDef.current) {
+        LazyColumn(
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            item {
+                FoldDefInfoItem("isSeparating", isSeparating.toString())
+                FoldDefInfoItem("orientation", orientation.toString())
+                FoldDefInfoItem("occlusionType", occlusionType.toString())
+                VerticalSpacer()
+                FoldDefInfoItem(
+                    "windowWidthSizeClass",
+                    windowSizeClass.windowWidthSizeClass.toString().lastPart()
+                )
+                FoldDefInfoItem(
+                    "windowHeightSizeClass",
+                    windowSizeClass.windowHeightSizeClass.toString().lastPart()
+                )
+                VerticalSpacer()
+                FoldDefInfoItem("foldWidth", foldWidth.toString())
+                FoldDefInfoItem("foldHeight", foldHeight.toString())
+                VerticalSpacer()
+                FoldDefInfoItem("widthLeftOrTop", widthLeftOrTop.toString())
+                FoldDefInfoItem("heightLeftOrTop", heightLeftOrTop.toString())
+                VerticalSpacer()
+                FoldDefInfoItem("widthRightOrBottom", widthRightOrBottom.toString())
+                FoldDefInfoItem("heightRightOrBottom", heightRightOrBottom.toString())
+            }
         }
     }
+}
+
+@Composable
+fun VerticalSpacer() {
+    Spacer(modifier = Modifier.height(16.dp))
+}
+
+@Composable
+fun FoldDefInfoItem(label: String, value: String) {
+    Row {
+        Text(
+            modifier = Modifier.alignByBaseline(),
+            text = label,
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            modifier = Modifier.alignByBaseline(),
+            text = value,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+private fun String.lastPart(): String {
+    val pattern = ": "
+    return if (contains(pattern))
+        substring(lastIndexOf(pattern) + pattern.length)
+    else
+        this
 }

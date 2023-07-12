@@ -11,9 +11,9 @@ import androidx.window.layout.WindowMetrics
 
 data class FoldDef(
     val hasFold: Boolean = false,
-    val foldOrientation: FoldingFeature.Orientation? = null,
+    val orientation: FoldingFeature.Orientation? = null,
     val occlusionType: FoldingFeature.OcclusionType = FoldingFeature.OcclusionType.NONE,
-    val isFoldSeparating: Boolean = false,
+    val isSeparating: Boolean = false,
     val foldWidth: Dp = 0.dp,
     val foldHeight: Dp = 0.dp,
     val widthLeftOrTop: Dp = 0.dp,
@@ -63,8 +63,8 @@ fun createFoldDef(
     }
     return with(LocalDensity.current) {
         FoldDef(
-            foldOrientation = foldOrientation,
-            isFoldSeparating = isFoldSeparating,
+            orientation = foldOrientation,
+            isSeparating = isFoldSeparating,
             occlusionType = foldOcclusionType,
             widthLeftOrTop = widthLeftOrTop.toDp(),
             heightLeftOrTop = heightLeftOrTop.toDp(),

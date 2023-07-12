@@ -4,6 +4,7 @@ import android.app.Activity
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -53,10 +54,14 @@ data class NavigationDestination(
     val enabled: Boolean = true,
     val alwaysShowLabel: Boolean = true,
 
+    val topBar: @Composable () -> Unit = {},
+
     val body: @Composable () -> Unit = {},
     val smallBody: @Composable () -> Unit = {},
     val secondaryBody: @Composable () -> Unit = {},
-    val smallSecondaryBody: (@Composable () -> Unit)? = null
+    val smallSecondaryBody: (@Composable () -> Unit)? = null,
+
+    val overlay: (@Composable BoxScope.() -> Unit)? = null
 )
 
 val LocalFoldDef = compositionLocalOf { FoldDef() }
@@ -66,24 +71,33 @@ fun Activity.AdaptiveScaffold(
     useDrawer: Boolean = false,
     startDestination: NavigationDestination,
     otherDestinations: List<NavigationDestination> = emptyList(),
+    onDestinationChanged: (NavigationDestination) -> Unit = {},
     topBar: @Composable () -> Unit = {},
 ) {
     val destinations = listOf(startDestination).plus(otherDestinations)
     var index by rememberSaveable(
         startDestination,
         otherDestinations
-    ) { mutableStateOf(destinations.indexOf(startDestination)) }
+    ) {
+        val startIndex = destinations.indexOf(startDestination)
+        onDestinationChanged(destinations[startIndex])
+        mutableStateOf(startIndex)
+    }
     val currentDestination = destinations[index]
     AdaptiveScaffold(
         useDrawer = useDrawer,
         index = index,
-        onSelectedIndexChange = { index = it },
+        onSelectedIndexChange = {
+            index = it
+            onDestinationChanged(destinations[index])
+        },
         destinations = destinations,
         topBar = topBar,
         body = currentDestination.body,
         secondaryBody = currentDestination.secondaryBody,
         smallBody = currentDestination.smallBody,
-        smallSecondaryBody = currentDestination.smallSecondaryBody
+        smallSecondaryBody = currentDestination.smallSecondaryBody,
+        overlay = currentDestination.overlay
     )
 }
 
@@ -97,7 +111,8 @@ fun Activity.AdaptiveScaffold(
     body: @Composable () -> Unit,
     smallBody: @Composable () -> Unit,
     secondaryBody: @Composable () -> Unit,
-    smallSecondaryBody: (@Composable () -> Unit)? = null
+    smallSecondaryBody: (@Composable () -> Unit)? = null,
+    overlay: (@Composable BoxScope.() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val layoutInfo by WindowInfoTracker.getOrCreate(context)
@@ -137,7 +152,8 @@ fun Activity.AdaptiveScaffold(
                 body = body,
                 smallBody = smallBody,
                 secondaryBody = secondaryBody,
-                smallSecondaryBody = smallSecondaryBody
+                smallSecondaryBody = smallSecondaryBody,
+                overlay = overlay
             )
         }
     }
@@ -254,6 +270,7 @@ private fun AdaptiveScaffoldContent(
     smallBody: @Composable () -> Unit,
     secondaryBody: @Composable () -> Unit,
     smallSecondaryBody: (@Composable () -> Unit)?,
+    overlay: (@Composable BoxScope.() -> Unit)? = null
 ) {
     val content: @Composable () -> Unit = {
         Row(modifier = Modifier.fillMaxSize()) {
@@ -266,7 +283,7 @@ private fun AdaptiveScaffoldContent(
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 if (
                     foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT &&
-                    foldDef.foldOrientation == FoldingFeature.Orientation.HORIZONTAL &&
+                    foldDef.orientation == FoldingFeature.Orientation.HORIZONTAL &&
                     (foldDef.occlusionType == FoldingFeature.OcclusionType.NONE || foldDef.foldHeight <= 4.dp)
                 ) {
                     TwoPaneScreen(
@@ -292,6 +309,11 @@ private fun AdaptiveScaffoldContent(
                         secondPane = smallSecondaryBody,
                         maxWidth = maxWidth
                     )
+                }
+                if (overlay != null) {
+                    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                        overlay()
+                    }
                 }
             }
         }
@@ -358,7 +380,7 @@ private fun FoldableScreen(
         )
     }
     val container = @Composable {
-        if (foldDef.foldOrientation == FoldingFeature.Orientation.VERTICAL) {
+        if (foldDef.orientation == FoldingFeature.Orientation.VERTICAL) {
             Row(modifier = Modifier.fillMaxSize()) {
                 Box(
                     modifier = Modifier
