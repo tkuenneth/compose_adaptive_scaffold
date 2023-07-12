@@ -39,78 +39,44 @@ import eu.thomaskuenneth.adaptivescaffold.NavigationDestination
 import eu.thomaskuenneth.adaptivescaffold.defaultColorScheme
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+fun destinationOne(showSmallSecondaryBody: Boolean) = NavigationDestination(
+    icon = R.drawable.ic_android_black_24dp,
+    label = R.string.one,
+    body = {
+        Body()
+    },
+    smallBody = {
+        SmallBody()
+    },
+    secondaryBody = { SecondaryBody() },
+    smallSecondaryBody = if (showSmallSecondaryBody) {
+        { SmallSecondaryBody() }
+    } else null
+)
+
+val destinationFoldInfo = NavigationDestination(
+    icon = R.drawable.baseline_perm_device_information_24,
+    label = R.string.fold_info
+)
+
 class AdaptiveScaffoldDemoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 setContent {
-                    var index by rememberSaveable { mutableStateOf(0) }
                     var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
-                    var showDestinations by rememberSaveable { mutableStateOf(true) }
-                    var moreOpen by remember { mutableStateOf(false) }
-                    val destinations = listOf(
-                        NavigationDestination(
-                            icon = R.drawable.ic_android_black_24dp,
-                            label = R.string.one
-                        ),
-                        NavigationDestination(
-                            icon = R.drawable.ic_android_black_24dp,
-                            label = R.string.two
-                        ),
-                        NavigationDestination(
-                            icon = R.drawable.ic_android_black_24dp,
-                            label = R.string.three
-                        ),
-                    )
                     MaterialTheme(
                         content = {
                             AdaptiveScaffold(
                                 useDrawer = true,
-                                index = index,
-                                onSelectedIndexChange = { i -> index = i },
-                                destinations = if (showDestinations) destinations else emptyList(),
-                                body = {
-                                    Body()
-                                },
-                                smallBody = {
-                                    SmallBody()
-                                },
-                                secondaryBody = { SecondaryBody() },
-                                smallSecondaryBody = if (showSmallSecondaryBody) {
-                                    { SmallSecondaryBody() }
-                                } else
-                                    null,
+                                startDestination = destinationOne(showSmallSecondaryBody),
+                                otherDestinations = listOf(destinationFoldInfo),
                                 topBar = {
-                                    TopAppBar(
-                                        title = {
-                                            Text(text = stringResource(id = R.string.app_name))
-                                        },
-                                        actions = {
-                                            IconButton(
-                                                onClick = {
-                                                    moreOpen = true
-                                                }
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.MoreVert,
-                                                    contentDescription = stringResource(id = R.string.options_menu)
-                                                )
-                                            }
-                                            DropDownMenu(
-                                                expanded = moreOpen,
-                                                onDismissRequest = { moreOpen = false },
-                                                showDestinationsClicked = {
-                                                    showDestinations = !showDestinations
-                                                    moreOpen = false
-                                                },
-                                                showSmallSecondaryBodyClicked = {
-                                                    showSmallSecondaryBody =
-                                                        !showSmallSecondaryBody
-                                                    moreOpen = false
-                                                }
-                                            )
+                                    AdaptiveScaffoldDemoTopAppBar(
+                                        showSmallSecondaryBodyClicked = {
+                                            showSmallSecondaryBody =
+                                                !showSmallSecondaryBody
                                         }
                                     )
                                 },
@@ -122,6 +88,37 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AdaptiveScaffoldDemoTopAppBar(showSmallSecondaryBodyClicked: () -> Unit) {
+    var moreOpen by remember { mutableStateOf(false) }
+    TopAppBar(
+        title = {
+            Text(text = stringResource(id = R.string.app_name))
+        },
+        actions = {
+            IconButton(
+                onClick = {
+                    moreOpen = true
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = stringResource(id = R.string.options_menu)
+                )
+            }
+            AdaptiveScaffoldDemoDropDownMenu(
+                expanded = moreOpen,
+                onDismissRequest = { moreOpen = false },
+                showSmallSecondaryBodyClicked = {
+                    showSmallSecondaryBodyClicked()
+                    moreOpen = false
+                }
+            )
+        }
+    )
 }
 
 @Composable
@@ -196,24 +193,15 @@ private fun ColoredBoxWithText(
 }
 
 @Composable
-private fun DropDownMenu(
+private fun AdaptiveScaffoldDemoDropDownMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    showDestinationsClicked: () -> Unit,
     showSmallSecondaryBodyClicked: () -> Unit
 ) {
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
     ) {
-        DropdownMenuItem(
-            onClick = showDestinationsClicked,
-            text = {
-                Text(
-                    text = stringResource(id = R.string.toggle_destinations)
-                )
-            }
-        )
         if (LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.COMPACT) {
             DropdownMenuItem(
                 onClick = showSmallSecondaryBodyClicked,

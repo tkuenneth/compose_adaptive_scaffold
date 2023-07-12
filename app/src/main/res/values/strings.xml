@@ -2,8 +2,7 @@
     <string name="app_name">AdaptiveScaffoldDemo</string>
 
     <string name="one">One</string>
-    <string name="two">Two</string>
-    <string name="three">Three</string>
+    <string name="fold_info">Fold info</string>
 
     <string name="body">body</string>
     <string name="small_body">small body</string>
@@ -12,6 +11,5 @@
 
     <string name="options_menu">Options menu</string>
     <string name="toggle_small_secondary_body">Toggle small secondary body</string>
-    <string name="toggle_destinations">Toggle destinations</string>
 
 </resources>

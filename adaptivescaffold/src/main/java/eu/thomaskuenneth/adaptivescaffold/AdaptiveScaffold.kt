@@ -32,6 +32,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -39,7 +42,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.window.core.ExperimentalWindowApi
 import androidx.window.core.layout.WindowHeightSizeClass
 import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.window.layout.FoldingFeature
@@ -51,6 +53,11 @@ data class NavigationDestination(
     @StringRes val label: Int,
     val enabled: Boolean = true,
     val alwaysShowLabel: Boolean = true,
+
+    val body: @Composable () -> Unit = {},
+    val smallBody: @Composable () -> Unit = {},
+    val secondaryBody: @Composable () -> Unit = {},
+    val smallSecondaryBody: (@Composable () -> Unit)? = null
 )
 
 data class WindowSizeClass(
@@ -60,7 +67,32 @@ data class WindowSizeClass(
 
 val LocalWindowSizeClass = compositionLocalOf { WindowSizeClass() }
 
-@OptIn(ExperimentalWindowApi::class)
+@Composable
+fun Activity.AdaptiveScaffold(
+    useDrawer: Boolean = false,
+    startDestination: NavigationDestination,
+    otherDestinations: List<NavigationDestination> = emptyList(),
+    topBar: @Composable () -> Unit = {},
+) {
+    val destinations = listOf(startDestination).plus(otherDestinations)
+    var index by rememberSaveable(
+        startDestination,
+        otherDestinations
+    ) { mutableStateOf(destinations.indexOf(startDestination)) }
+    val currentDestination = destinations[index]
+    AdaptiveScaffold(
+        useDrawer = useDrawer,
+        index = index,
+        onSelectedIndexChange = { index = it },
+        destinations = destinations,
+        topBar = topBar,
+        body = currentDestination.body,
+        secondaryBody = currentDestination.secondaryBody,
+        smallBody = currentDestination.smallBody,
+        smallSecondaryBody = currentDestination.smallSecondaryBody
+    )
+}
+
 @Composable
 fun Activity.AdaptiveScaffold(
     useDrawer: Boolean = false,
