@@ -14,6 +14,7 @@ data class FoldDef(
     val orientation: FoldingFeature.Orientation? = null,
     val occlusionType: FoldingFeature.OcclusionType = FoldingFeature.OcclusionType.NONE,
     val isSeparating: Boolean = false,
+    val state: FoldingFeature.State = FoldingFeature.State.FLAT,
     val foldWidth: Dp = 0.dp,
     val foldHeight: Dp = 0.dp,
     val widthLeftOrTop: Dp = 0.dp,
@@ -22,30 +23,27 @@ data class FoldDef(
     val heightRightOrBottom: Dp = 0.dp,
     val isPortrait: Boolean = false,
     val windowSizeClass: WindowSizeClass = WindowSizeClass.compute(
-        dpWidth = 0F,
-        dpHeight = 0F
-    )
-)
+        dpWidth = 1F,
+        dpHeight = 1F
+    ),
+    val bounds: android.graphics.Rect = android.graphics.Rect(0, 0, 0, 0),
+) {
+    companion object {
+        val EMPTY = FoldDef()
+    }
+}
 
 @Composable
 fun createFoldDef(
     layoutInfo: WindowLayoutInfo?,
     windowMetrics: WindowMetrics
 ): FoldDef {
-    var foldOrientation: FoldingFeature.Orientation? = null
-    var isFoldSeparating = false
-    var foldOcclusionType = FoldingFeature.OcclusionType.NONE
     var widthLeftOrTop = 0
     var heightLeftOrTop = 0
     var widthRightOrBottom = 0
     var heightRightOrBottom = 0
-    var foldWidth = 0
-    var foldHeight = 0
     layoutInfo?.displayFeatures?.forEach { displayFeature ->
         (displayFeature as FoldingFeature).run {
-            foldOrientation = orientation
-            isFoldSeparating = isSeparating
-            foldOcclusionType = occlusionType
             if (orientation == FoldingFeature.Orientation.VERTICAL) {
                 widthLeftOrTop = bounds.left
                 heightLeftOrTop = windowMetrics.bounds.height()
@@ -57,29 +55,30 @@ fun createFoldDef(
                 widthRightOrBottom = windowMetrics.bounds.width()
                 heightRightOrBottom = windowMetrics.bounds.height() - bounds.bottom
             }
-            foldWidth = bounds.width()
-            foldHeight = bounds.height()
+            return with(LocalDensity.current) {
+                FoldDef(
+                    hasFold = true,
+                    orientation = orientation,
+                    occlusionType = occlusionType,
+                    isSeparating = isSeparating,
+                    state = state,
+                    foldWidth = bounds.width().toDp(),
+                    foldHeight = bounds.height().toDp(),
+                    widthLeftOrTop = widthLeftOrTop.toDp(),
+                    heightLeftOrTop = heightLeftOrTop.toDp(),
+                    widthRightOrBottom = widthRightOrBottom.toDp(),
+                    heightRightOrBottom = heightRightOrBottom.toDp(),
+                    isPortrait = windowWidthDp(windowMetrics) / windowHeightDp(windowMetrics) <= 1F,
+                    windowSizeClass = WindowSizeClass.compute(
+                        dpWidth = windowWidthDp(windowMetrics = windowMetrics).value,
+                        dpHeight = windowHeightDp(windowMetrics = windowMetrics).value
+                    ),
+                    bounds = bounds,
+                )
+            }
         }
     }
-    return with(LocalDensity.current) {
-        FoldDef(
-            orientation = foldOrientation,
-            isSeparating = isFoldSeparating,
-            occlusionType = foldOcclusionType,
-            widthLeftOrTop = widthLeftOrTop.toDp(),
-            heightLeftOrTop = heightLeftOrTop.toDp(),
-            widthRightOrBottom = widthRightOrBottom.toDp(),
-            heightRightOrBottom = heightRightOrBottom.toDp(),
-            foldWidth = foldWidth.toDp(),
-            foldHeight = foldHeight.toDp(),
-            isPortrait = windowWidthDp(windowMetrics) / windowHeightDp(windowMetrics) <= 1F,
-            windowSizeClass = WindowSizeClass.compute(
-                dpWidth = windowWidthDp(windowMetrics = windowMetrics).value,
-                dpHeight = windowHeightDp(windowMetrics = windowMetrics).value
-            ),
-            hasFold = foldOrientation != null
-        )
-    }
+    return FoldDef.EMPTY
 }
 
 @Composable

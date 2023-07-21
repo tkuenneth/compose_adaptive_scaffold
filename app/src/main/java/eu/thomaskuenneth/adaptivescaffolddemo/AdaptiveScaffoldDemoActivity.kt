@@ -237,6 +237,7 @@ private fun FoldDefInfo() {
                 FoldDefInfoItem("isSeparating", isSeparating.toString())
                 FoldDefInfoItem("orientation", orientation.toString())
                 FoldDefInfoItem("occlusionType", occlusionType.toString())
+                FoldDefInfoItem("state", state.toString())
                 VerticalSpacer()
                 FoldDefInfoItem(
                     "windowWidthSizeClass",
@@ -255,6 +256,8 @@ private fun FoldDefInfo() {
                 VerticalSpacer()
                 FoldDefInfoItem("widthRightOrBottom", widthRightOrBottom.toString())
                 FoldDefInfoItem("heightRightOrBottom", heightRightOrBottom.toString())
+                VerticalSpacer()
+                FoldDefInfoItem("bounds", bounds.toString())
             }
         }
     }
