@@ -49,6 +49,11 @@ fun createFoldDef(
     var heightLeftOrTop = 0
     var widthRightOrBottom = 0
     var heightRightOrBottom = 0
+    val currentWindowSizeClass = WindowSizeClass.compute(
+        dpWidth = windowWidthDp(windowMetrics = windowMetrics).value,
+        dpHeight = windowHeightDp(windowMetrics = windowMetrics).value
+    )
+    val currentPortrait = windowWidthDp(windowMetrics) / windowHeightDp(windowMetrics) <= 1F
     layoutInfo?.displayFeatures?.forEach { displayFeature ->
         (displayFeature as FoldingFeature).run {
             val navigationBottomOrRight = with(
@@ -102,17 +107,17 @@ fun createFoldDef(
                     heightLeftOrTop = heightLeftOrTop.toDp(),
                     widthRightOrBottom = widthRightOrBottom.toDp(),
                     heightRightOrBottom = heightRightOrBottom.toDp(),
-                    isPortrait = windowWidthDp(windowMetrics) / windowHeightDp(windowMetrics) <= 1F,
-                    windowSizeClass = WindowSizeClass.compute(
-                        dpWidth = windowWidthDp(windowMetrics = windowMetrics).value,
-                        dpHeight = windowHeightDp(windowMetrics = windowMetrics).value
-                    ),
+                    isPortrait = currentPortrait,
+                    windowSizeClass = currentWindowSizeClass,
                     bounds = bounds,
                 )
             }
         }
     }
-    return FoldDef.EMPTY
+    return FoldDef.EMPTY.copy(
+        windowSizeClass = currentWindowSizeClass,
+        isPortrait = currentPortrait
+    )
 }
 
 @Composable

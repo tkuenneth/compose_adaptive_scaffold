@@ -31,7 +31,7 @@ implementation dependency:
 
 ```groovy
 dependencies {
-    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.2.2"
+    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.2.3"
 }
 ```
 
