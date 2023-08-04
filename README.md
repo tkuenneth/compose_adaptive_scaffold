@@ -24,12 +24,6 @@ composables - everything else is handled by *compose_adaptive_scaffold*.
 <img src="./docs/Duo_04.jpg" width="25%" valign="top" alt="Picture of Microsoft Surface Duo landscape opened" />
 </p>
 
-**Please note**
-
-Version `0.2.0` removes `LocalWindowSizeClass` in favor of the new `LocalFoldDef` `CompositionLocal`. Instead of writing,
-for example, `if (LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.COMPACT) {` you should now be using
-`if (LocalFoldDef.current.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT) {`.
-
 ### Setup
 
 The library is available through Maven Central. To include it in your apps, just add an
@@ -41,7 +35,7 @@ dependencies {
 }
 ```
 
-The library uses this configuration:
+It uses the following configuration:
 
 | Property | Value                                |
 | -------- |--------------------------------------|
@@ -58,84 +52,125 @@ Used libraries:
 
 ### How to use
 
-Here's how the main activity of the sample app looks like. The two states, `toggleSmallSecondaryBodyVisible`
-and `showSmallSecondaryBody` are used to show or hide a menu, so they are not strictly related to
-`AdaptiveScaffold()`.
+Here's how a simple sample activity looks like:
 
 ```kotlin
-class AdaptiveScaffoldDemoActivity : ComponentActivity() {
+class SimpleDemoActivity : ComponentActivity() {
+  @OptIn(ExperimentalMaterial3Api::class)
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    lifecycleScope.launch {
-      lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-        setContent {
-          var toggleSmallSecondaryBodyVisible by rememberSaveable { mutableStateOf(false) }
-          var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
-          MaterialTheme(
-            content = {
-              AdaptiveScaffold(
-                useDrawer = true,
-                startDestination = destinationOne(showSmallSecondaryBody),
-                otherDestinations = listOf(destinationFoldInfo),
-                onDestinationChanged = {
-                  toggleSmallSecondaryBodyVisible = it != destinationFoldInfo
-                },
-                topBar = {
-                  AdaptiveScaffoldDemoTopAppBar(
-                    toggleSmallSecondaryBodyVisible = toggleSmallSecondaryBodyVisible,
-                    toggleSmallSecondaryBodyClicked = {
-                      showSmallSecondaryBody = !showSmallSecondaryBody
-                    }
-                  )
-                },
-              )
+    setContentRepeatOnLifecycleStarted {
+      MaterialTheme(
+        content = {
+          AdaptiveScaffold(
+            startDestination = destination1,
+            otherDestinations = listOf(destination2),
+            onDestinationChanged = {
+              // do something
             },
-            colorScheme = defaultColorScheme()
+            topBar = {
+              TopAppBar(
+                title = {
+                  Text(
+                    text = stringResource(
+                      id = R.string.app_name
+                    )
+                  )
+                })
+            },
           )
-        }
-      }
+        },
+        colorScheme = defaultColorScheme()
+      )
     }
   }
 }
 ```
 
-The two destinations are defined like this:
+Have you noticed there is no `setContent {}` but instead `setContentRepeatOnLifecycleStarted {}` is used?
+This is just a tiny wrapper. It is implemented like this:
 
 ```kotlin
-fun destinationOne(showSmallSecondaryBody: Boolean) = NavigationDestination(
-  icon = R.drawable.ic_android_black_24dp,
-  label = R.string.one,
-  body = {
-    Body()
-  },
-  smallBody = {
-    SmallBody()
-  },
-  secondaryBody = { SecondaryBody() },
-  smallSecondaryBody = if (showSmallSecondaryBody) {
-    { SmallSecondaryBody() }
-  } else null
+fun ComponentActivity.setContentRepeatOnLifecycleStarted(
+    parent: CompositionContext? = null,
+    content: @Composable () -> Unit
+) {
+    lifecycleScope.launch {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            setContent(
+                parent = parent,
+                content = content
+            )
+        }
+    }
+}
+```
+
+This is needed to get informed upon posture and orientation changes. The two destinations that are passed
+to `AdaptiveScaffold` are defined like this:
+
+```kotlin
+val destination1 = NavigationDestination(
+    icon = R.drawable.ic_android_black_24dp,
+    label = R.string.one,
+    body = {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.Red)
+        )
+    },
+    secondaryBody = {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.Green)
+        )
+    },
+    smallBody = {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.Blue)
+        )
+    },
+    smallSecondaryBody = {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.Yellow)
+        )
+    },
 )
 
-val destinationFoldInfo = NavigationDestination(
-  icon = R.drawable.baseline_perm_device_information_24,
-  label = R.string.fold_info,
-  overlay = { FoldDefInfo() },
+val destination2 = NavigationDestination(
+    icon = R.drawable.ic_android_black_24dp,
+    label = R.string.two,
+    overlay = {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = Color.LightGray)
+        )
+    },
 )
 ```
 
-Defining a destination as a function allows you to changes panes based on state.
-
-`NavigationDestination` receives an icon, a label, and four composable functions:
+`NavigationDestination` receives an icon, a label, and five composable functions:
 
 1. a body
 2. a secondary body
 3. a small body
 4. a small secondary body (can be `null`)
+5. an overlay (optional)
 
 Depending on the app window size, either *body* and *secondary body* **or** *small body*
 and *small secondary body* are shown. If the device has a hinge, all features of the hinge including
 its location, size, and orientation are honored.
+
+If you want to show something that should span the two panes, you can pass a `overlay` composable 
+to `NavigationDestination`. Please have a look at `destinationFoldInfo` in *AdaptiveScaffoldDemoActivity.kt*
+to see how that works. In this example the two panes are empty, so the overlay becomes the main content.
 
 Inside your composable functions, you can use `LocalFoldDef.current` to find out the 
 current window size classes and the configuration of the fold or hinge.
@@ -175,10 +210,7 @@ private fun FoldDefInfo() {
 }
 ```
 
-Here's something interesting: if you want to show something that should span the two panes,
-you can pass a `overlay` composable to `NavigationDestination`. Please have a look at `destinationFoldInfo` to
-see how that works. In this example the two panes are empty, so the overlay becomes the main content.
-
 ### Acknowledgements
 
-*compose_adaptive_scaffold* is inspired by the Flutter package [flutter_adaptive_scaffold](https://pub.dev/packages/flutter_adaptive_scaffold).
+*compose_adaptive_scaffold* is inspired by the Flutter 
+package [flutter_adaptive_scaffold](https://pub.dev/packages/flutter_adaptive_scaffold).

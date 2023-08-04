@@ -1,6 +1,8 @@
 package eu.thomaskuenneth.adaptivescaffold
 
 import android.app.Activity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
@@ -29,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
@@ -43,10 +46,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
 import androidx.window.layout.WindowMetricsCalculator
+import kotlinx.coroutines.launch
 
 data class NavigationDestination(
     @DrawableRes val icon: Int,
@@ -65,6 +72,20 @@ data class NavigationDestination(
 )
 
 val LocalFoldDef = compositionLocalOf { FoldDef() }
+
+fun ComponentActivity.setContentRepeatOnLifecycleStarted(
+    parent: CompositionContext? = null,
+    content: @Composable () -> Unit
+) {
+    lifecycleScope.launch {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            setContent(
+                parent = parent,
+                content = content
+            )
+        }
+    }
+}
 
 @Composable
 fun Activity.AdaptiveScaffold(

@@ -2,7 +2,6 @@ package eu.thomaskuenneth.adaptivescaffolddemo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -36,15 +35,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.core.layout.WindowWidthSizeClass
 import eu.thomaskuenneth.adaptivescaffold.AdaptiveScaffold
 import eu.thomaskuenneth.adaptivescaffold.LocalFoldDef
 import eu.thomaskuenneth.adaptivescaffold.NavigationDestination
 import eu.thomaskuenneth.adaptivescaffold.defaultColorScheme
-import kotlinx.coroutines.launch
+import eu.thomaskuenneth.adaptivescaffold.setContentRepeatOnLifecycleStarted
 
 fun destinationOne(showSmallSecondaryBody: Boolean) = NavigationDestination(
     icon = R.drawable.ic_android_black_24dp,
@@ -70,34 +66,30 @@ val destinationFoldInfo = NavigationDestination(
 class AdaptiveScaffoldDemoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                setContent {
-                    var toggleSmallSecondaryBodyVisible by rememberSaveable { mutableStateOf(false) }
-                    var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
-                    MaterialTheme(
-                        content = {
-                            AdaptiveScaffold(
-                                useDrawer = true,
-                                startDestination = destinationOne(showSmallSecondaryBody),
-                                otherDestinations = listOf(destinationFoldInfo),
-                                onDestinationChanged = {
-                                    toggleSmallSecondaryBodyVisible = it != destinationFoldInfo
-                                },
-                                topBar = {
-                                    AdaptiveScaffoldDemoTopAppBar(
-                                        toggleSmallSecondaryBodyVisible = toggleSmallSecondaryBodyVisible,
-                                        toggleSmallSecondaryBodyClicked = {
-                                            showSmallSecondaryBody = !showSmallSecondaryBody
-                                        }
-                                    )
-                                },
+        setContentRepeatOnLifecycleStarted {
+            var toggleSmallSecondaryBodyVisible by rememberSaveable { mutableStateOf(false) }
+            var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
+            MaterialTheme(
+                content = {
+                    AdaptiveScaffold(
+                        useDrawer = true,
+                        startDestination = destinationOne(showSmallSecondaryBody),
+                        otherDestinations = listOf(destinationFoldInfo),
+                        onDestinationChanged = {
+                            toggleSmallSecondaryBodyVisible = it != destinationFoldInfo
+                        },
+                        topBar = {
+                            AdaptiveScaffoldDemoTopAppBar(
+                                toggleSmallSecondaryBodyVisible = toggleSmallSecondaryBodyVisible,
+                                toggleSmallSecondaryBodyClicked = {
+                                    showSmallSecondaryBody = !showSmallSecondaryBody
+                                }
                             )
                         },
-                        colorScheme = defaultColorScheme()
                     )
-                }
-            }
+                },
+                colorScheme = defaultColorScheme()
+            )
         }
     }
 }
