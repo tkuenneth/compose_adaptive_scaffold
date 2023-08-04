@@ -56,15 +56,8 @@ fun createFoldDef(
     val currentPortrait = windowWidthDp(windowMetrics) / windowHeightDp(windowMetrics) <= 1F
     layoutInfo?.displayFeatures?.forEach { displayFeature ->
         (displayFeature as FoldingFeature).run {
-            val navigationBottomOrRight = with(
-                windowMetrics.getWindowInsets()
-                    .getInsets(WindowInsetsCompat.Type.navigationBars())
-            ) {
-                if (orientation == FoldingFeature.Orientation.HORIZONTAL)
-                    bottom
-                else
-                    right
-            }
+            val navigationBars = windowMetrics.getWindowInsets()
+                .getInsets(WindowInsetsCompat.Type.navigationBars())
             var foldWidth = bounds.width()
             var foldHeight = bounds.height()
             val foldAdjusted = isSurfaceDuo && (foldWidth == 0 || foldHeight == 0)
@@ -77,11 +70,11 @@ fun createFoldDef(
                 else
                     bounds.left
                 heightLeftOrTop = windowMetrics.bounds.height()
-                widthRightOrBottom = if (foldAdjusted)
+                widthRightOrBottom = (if (foldAdjusted)
                     (windowMetrics.bounds.width() - foldWidth) / 2
                 else
-                    windowMetrics.bounds.width() - bounds.right
-                heightRightOrBottom = heightLeftOrTop - navigationBottomOrRight
+                    windowMetrics.bounds.width() - bounds.right) - navigationBars.right
+                heightRightOrBottom = heightLeftOrTop - navigationBars.bottom
             } else if (orientation == FoldingFeature.Orientation.HORIZONTAL) {
                 if (widthOrHeight.contains(windowMetrics.bounds.height())) {
                     if (foldAdjusted) foldHeight = if (foldWidth == 1800) 84 else 66
@@ -92,7 +85,7 @@ fun createFoldDef(
                 heightRightOrBottom = (if (foldAdjusted)
                     (windowMetrics.bounds.height() - foldHeight) / 2
                 else
-                    windowMetrics.bounds.height() - bounds.bottom) - navigationBottomOrRight
+                    windowMetrics.bounds.height() - bounds.bottom) - navigationBars.bottom
             }
             return with(LocalDensity.current) {
                 FoldDef(
