@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.Insets
 import androidx.core.view.WindowInsetsCompat
 import androidx.window.core.ExperimentalWindowApi
 import androidx.window.core.layout.WindowSizeClass
@@ -30,6 +31,7 @@ data class FoldDef(
         dpHeight = 1F
     ),
     val bounds: android.graphics.Rect = android.graphics.Rect(0, 0, 0, 0),
+    val navigationBars: Insets = Insets.NONE
 ) {
     companion object {
         val EMPTY = FoldDef()
@@ -69,12 +71,12 @@ fun createFoldDef(
                     (windowMetrics.bounds.width() - foldWidth) / 2
                 else
                     bounds.left
-                heightLeftOrTop = windowMetrics.bounds.height()
+                heightLeftOrTop = windowMetrics.bounds.height() - navigationBars.bottom
                 widthRightOrBottom = (if (foldAdjusted)
                     (windowMetrics.bounds.width() - foldWidth) / 2
                 else
                     windowMetrics.bounds.width() - bounds.right) - navigationBars.right
-                heightRightOrBottom = heightLeftOrTop - navigationBars.bottom
+                heightRightOrBottom = heightLeftOrTop
             } else if (orientation == FoldingFeature.Orientation.HORIZONTAL) {
                 if (widthOrHeight.contains(windowMetrics.bounds.height())) {
                     if (foldAdjusted) foldHeight = if (foldWidth == 1800) 84 else 66
@@ -103,6 +105,7 @@ fun createFoldDef(
                     isPortrait = currentPortrait,
                     windowSizeClass = currentWindowSizeClass,
                     bounds = bounds,
+                    navigationBars = navigationBars,
                 )
             }
         }

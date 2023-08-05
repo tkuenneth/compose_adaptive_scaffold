@@ -37,11 +37,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -148,18 +151,26 @@ fun Activity.AdaptiveScaffold(
     val hasBottomBar =
         foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT
     val hasNavigationRail = !hasBottomBar && !hasDrawer
+    var bottomBarHeight by remember { mutableStateOf(0.dp) }
+    val localDensity = LocalDensity.current
     CompositionLocalProvider(LocalFoldDef provides foldDef) {
         Scaffold(
             topBar = {
                 topBar()
             },
             bottomBar = {
-                AdaptiveScaffoldBottomBar(
-                    hasBottomBar = hasBottomBar,
-                    index = index,
-                    onSelectedIndexChange = onSelectedIndexChange,
-                    destinations = destinations
-                )
+                Box(modifier = Modifier.onGloballyPositioned {
+                    bottomBarHeight = with(localDensity) {
+                        it.size.height.toDp()
+                    }
+                }) {
+                    AdaptiveScaffoldBottomBar(
+                        hasBottomBar = hasBottomBar,
+                        index = index,
+                        onSelectedIndexChange = onSelectedIndexChange,
+                        destinations = destinations
+                    )
+                }
             }
         ) { padding ->
             AdaptiveScaffoldContent(
@@ -174,7 +185,8 @@ fun Activity.AdaptiveScaffold(
                 smallBody = smallBody,
                 secondaryBody = secondaryBody,
                 smallSecondaryBody = smallSecondaryBody,
-                overlay = overlay
+                overlay = overlay,
+                bottomBarHeight = bottomBarHeight
             )
         }
     }
@@ -290,8 +302,9 @@ private fun AdaptiveScaffoldContent(
     body: @Composable () -> Unit,
     smallBody: @Composable () -> Unit,
     secondaryBody: @Composable () -> Unit,
-    smallSecondaryBody: (@Composable () -> Unit)?,
-    overlay: (@Composable BoxScope.() -> Unit)? = null
+    smallSecondaryBody: @Composable (() -> Unit)?,
+    overlay: @Composable (BoxScope.() -> Unit)? = null,
+    bottomBarHeight: Dp
 ) {
     val content: @Composable () -> Unit = {
         Row(modifier = Modifier.fillMaxSize()) {
@@ -305,7 +318,7 @@ private fun AdaptiveScaffoldContent(
                 if (
                     foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT &&
                     foldDef.orientation == FoldingFeature.Orientation.HORIZONTAL &&
-                    (foldDef.occlusionType == FoldingFeature.OcclusionType.NONE || foldDef.foldHeight <= 4.dp)
+                    (foldDef.state != FoldingFeature.State.HALF_OPENED)
                 ) {
                     TwoPaneScreen(
                         firstPane = smallBody,
@@ -317,6 +330,7 @@ private fun AdaptiveScaffoldContent(
                         foldDef = foldDef,
                         body = body,
                         secondaryBody = secondaryBody,
+                        bottomBarHeight = bottomBarHeight
                     )
                 } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
                     TwoPaneScreen(
@@ -392,6 +406,7 @@ private fun FoldableScreen(
     foldDef: FoldDef,
     body: @Composable () -> Unit,
     secondaryBody: @Composable () -> Unit,
+    bottomBarHeight: Dp,
 ) {
     val hinge = @Composable {
         Spacer(
@@ -432,7 +447,7 @@ private fun FoldableScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(foldDef.heightRightOrBottom)
+                        .height(foldDef.heightRightOrBottom - bottomBarHeight)
                 ) {
                     secondaryBody()
                 }

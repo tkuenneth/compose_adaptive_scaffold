@@ -5,7 +5,7 @@ plugins {
 
 ext {
     PUBLISH_GROUP_ID = 'com.github.tkuenneth'
-    PUBLISH_VERSION = '0.2.4'
+    PUBLISH_VERSION = '0.3.0'
     PUBLISH_ARTIFACT_ID = 'compose_adaptive_scaffold'
 }
 
