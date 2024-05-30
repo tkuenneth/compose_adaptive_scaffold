@@ -36,6 +36,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -105,7 +106,7 @@ fun Activity.AdaptiveScaffold(
     ) {
         val startIndex = destinations.indexOf(startDestination)
         onDestinationChanged(destinations[startIndex])
-        mutableStateOf(startIndex)
+        mutableIntStateOf(startIndex)
     }
     val currentDestination = destinations[index]
     AdaptiveScaffold(

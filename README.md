@@ -40,15 +40,15 @@ It uses the following configuration:
 | Property | Value                                |
 | -------- |--------------------------------------|
 | `namespace` | `eu.thomaskuenneth.adaptivescaffold` |
-| `minSdk` | `24`                                 |
+| `minSdk` | `30`                                 |
 | `targetSdk` | `34`                                 |
 
 Used libraries:
 
-| Name | Version         |
-| -------- |-----------------|
-| *Jetpack WindowManager* | `1.2.0-alpha03` |
-| *Jetpack Compose BOM* | `2023.05.01`    |
+| Name | Version      |
+| -------- |--------------|
+| *Jetpack WindowManager* | `1.3.0`      |
+| *Jetpack Compose BOM* | `2024.05.00` |
 
 ### How to use
 
