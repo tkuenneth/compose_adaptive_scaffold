@@ -2,6 +2,7 @@ package eu.thomaskuenneth.adaptivescaffolddemo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -66,6 +67,7 @@ val destinationFoldInfo = NavigationDestination(
 class AdaptiveScaffoldDemoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentRepeatOnLifecycleStarted {
             var toggleSmallSecondaryBodyVisible by rememberSaveable { mutableStateOf(false) }
             var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
