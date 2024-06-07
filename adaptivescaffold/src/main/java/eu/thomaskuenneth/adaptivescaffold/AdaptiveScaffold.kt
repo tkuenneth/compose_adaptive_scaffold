@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -168,45 +170,42 @@ fun Activity.AdaptiveScaffold(
     var bottomBarHeight by remember { mutableStateOf(0.dp) }
     val localDensity = LocalDensity.current
     CompositionLocalProvider(LocalFoldDef provides foldDef) {
-        Surface {
-            Scaffold(
-                modifier = Modifier
-                    .windowInsetsPadding(WindowInsets.displayCutout)
-                    .nestedScroll(scrollBehavior.nestedScrollConnection),
-                topBar = {
-                    topBar(scrollBehavior)
-                },
-                bottomBar = {
-                    Box(modifier = Modifier.onGloballyPositioned {
-                        bottomBarHeight = with(localDensity) {
-                            it.size.height.toDp()
-                        }
-                    }) {
-                        AdaptiveScaffoldBottomBar(
-                            hasBottomBar = hasBottomBar,
-                            index = index,
-                            onSelectedIndexChange = onSelectedIndexChange,
-                            destinations = destinations
-                        )
+        Scaffold(
+            modifier = Modifier
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                topBar(scrollBehavior)
+            },
+            bottomBar = {
+                Box(modifier = Modifier.onGloballyPositioned {
+                    bottomBarHeight = with(localDensity) {
+                        it.size.height.toDp()
                     }
+                }) {
+                    AdaptiveScaffoldBottomBar(
+                        hasBottomBar = hasBottomBar,
+                        index = index,
+                        onSelectedIndexChange = onSelectedIndexChange,
+                        destinations = destinations
+                    )
                 }
-            ) { padding ->
-                AdaptiveScaffoldContent(
-                    foldDef = foldDef,
-                    paddingValues = padding,
-                    hasNavigationRail = hasNavigationRail,
-                    hasDrawer = hasDrawer,
-                    index = index,
-                    onSelectedIndexChange = onSelectedIndexChange,
-                    destinations = destinations,
-                    body = body,
-                    smallBody = smallBody,
-                    secondaryBody = secondaryBody,
-                    smallSecondaryBody = smallSecondaryBody,
-                    overlay = overlay,
-                    bottomBarHeight = bottomBarHeight
-                )
             }
+        ) { padding ->
+            AdaptiveScaffoldContent(
+                foldDef = foldDef,
+                paddingValues = padding,
+                hasNavigationRail = hasNavigationRail,
+                hasDrawer = hasDrawer,
+                index = index,
+                onSelectedIndexChange = onSelectedIndexChange,
+                destinations = destinations,
+                body = body,
+                smallBody = smallBody,
+                secondaryBody = secondaryBody,
+                smallSecondaryBody = smallSecondaryBody,
+                overlay = overlay,
+                bottomBarHeight = bottomBarHeight
+            )
         }
     }
 }
@@ -326,7 +325,12 @@ private fun AdaptiveScaffoldContent(
     bottomBarHeight: Dp
 ) {
     val content: @Composable () -> Unit = {
-        Row(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .consumeWindowInsets(WindowInsets.systemBars)
+                .windowInsetsPadding(WindowInsets.displayCutout)
+        ) {
             AdaptiveScaffoldNavigationRail(
                 hasNavigationRail = hasNavigationRail,
                 index = index,
