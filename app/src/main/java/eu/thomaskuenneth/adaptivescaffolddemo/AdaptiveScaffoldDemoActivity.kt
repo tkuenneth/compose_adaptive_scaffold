@@ -2,7 +2,6 @@ package eu.thomaskuenneth.adaptivescaffolddemo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -23,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,10 +65,10 @@ val destinationFoldInfo = NavigationDestination(
 )
 
 class AdaptiveScaffoldDemoActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentRepeatOnLifecycleStarted {
+        setContentRepeatOnLifecycleStarted(enableEdgeToEdge = true) {
             var toggleSmallSecondaryBodyVisible by rememberSaveable { mutableStateOf(false) }
             var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
             MaterialTheme(
@@ -80,8 +80,9 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
                         onDestinationChanged = {
                             toggleSmallSecondaryBodyVisible = it != destinationFoldInfo
                         },
-                        topBar = {
+                        topBar = { scrollBehavior ->
                             AdaptiveScaffoldDemoTopAppBar(
+                                scrollBehavior = scrollBehavior,
                                 toggleSmallSecondaryBodyVisible = toggleSmallSecondaryBodyVisible,
                                 toggleSmallSecondaryBodyClicked = {
                                     showSmallSecondaryBody = !showSmallSecondaryBody
@@ -99,6 +100,7 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdaptiveScaffoldDemoTopAppBar(
+    scrollBehavior: TopAppBarScrollBehavior,
     toggleSmallSecondaryBodyClicked: () -> Unit,
     toggleSmallSecondaryBodyVisible: Boolean
 ) {
@@ -122,6 +124,7 @@ fun AdaptiveScaffoldDemoTopAppBar(
         }
     }
     TopAppBar(
+        scrollBehavior = scrollBehavior,
         title = {
             Text(text = stringResource(id = R.string.app_name))
         },

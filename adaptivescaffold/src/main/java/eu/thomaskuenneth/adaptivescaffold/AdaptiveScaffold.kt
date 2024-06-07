@@ -3,9 +3,9 @@ package eu.thomaskuenneth.adaptivescaffold
 import android.app.Activity
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -14,22 +14,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.captionBar
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
@@ -40,6 +35,8 @@ import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionContext
 import androidx.compose.runtime.CompositionLocalProvider
@@ -53,7 +50,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -89,9 +86,11 @@ data class NavigationDestination(
 val LocalFoldDef = compositionLocalOf { FoldDef() }
 
 fun ComponentActivity.setContentRepeatOnLifecycleStarted(
+    enableEdgeToEdge: Boolean = false,
     parent: CompositionContext? = null,
     content: @Composable () -> Unit
 ) {
+    if (enableEdgeToEdge) enableEdgeToEdge()
     lifecycleScope.launch {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             setContent(
@@ -102,13 +101,14 @@ fun ComponentActivity.setContentRepeatOnLifecycleStarted(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Activity.AdaptiveScaffold(
     useDrawer: Boolean = false,
     startDestination: NavigationDestination,
     otherDestinations: List<NavigationDestination> = emptyList(),
     onDestinationChanged: (NavigationDestination) -> Unit = {},
-    topBar: @Composable () -> Unit = {},
+    topBar: @Composable (scrollBehavior: TopAppBarScrollBehavior) -> Unit = {},
 ) {
     val destinations = listOf(startDestination).plus(otherDestinations)
     var index by rememberSaveable(
@@ -137,13 +137,15 @@ fun Activity.AdaptiveScaffold(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Activity.AdaptiveScaffold(
     useDrawer: Boolean = false,
     index: Int = -1,
     onSelectedIndexChange: (Int) -> Unit = {},
     destinations: List<NavigationDestination> = emptyList(),
-    topBar: @Composable () -> Unit = {},
+    scrollBehavior: TopAppBarScrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(),
+    topBar: @Composable (scrollBehavior: TopAppBarScrollBehavior) -> Unit = {},
     body: @Composable () -> Unit,
     smallBody: @Composable () -> Unit,
     secondaryBody: @Composable () -> Unit,
@@ -166,43 +168,45 @@ fun Activity.AdaptiveScaffold(
     var bottomBarHeight by remember { mutableStateOf(0.dp) }
     val localDensity = LocalDensity.current
     CompositionLocalProvider(LocalFoldDef provides foldDef) {
-        Scaffold(
-            modifier = Modifier
-                .background(color = MaterialTheme.colorScheme.background)
-                .windowInsetsPadding(WindowInsets.displayCutout),
-            topBar = {
-                topBar()
-            },
-            bottomBar = {
-                Box(modifier = Modifier.onGloballyPositioned {
-                    bottomBarHeight = with(localDensity) {
-                        it.size.height.toDp()
+        Surface {
+            Scaffold(
+                modifier = Modifier
+                    .windowInsetsPadding(WindowInsets.displayCutout)
+                    .nestedScroll(scrollBehavior.nestedScrollConnection),
+                topBar = {
+                    topBar(scrollBehavior)
+                },
+                bottomBar = {
+                    Box(modifier = Modifier.onGloballyPositioned {
+                        bottomBarHeight = with(localDensity) {
+                            it.size.height.toDp()
+                        }
+                    }) {
+                        AdaptiveScaffoldBottomBar(
+                            hasBottomBar = hasBottomBar,
+                            index = index,
+                            onSelectedIndexChange = onSelectedIndexChange,
+                            destinations = destinations
+                        )
                     }
-                }) {
-                    AdaptiveScaffoldBottomBar(
-                        hasBottomBar = hasBottomBar,
-                        index = index,
-                        onSelectedIndexChange = onSelectedIndexChange,
-                        destinations = destinations
-                    )
                 }
+            ) { padding ->
+                AdaptiveScaffoldContent(
+                    foldDef = foldDef,
+                    paddingValues = padding,
+                    hasNavigationRail = hasNavigationRail,
+                    hasDrawer = hasDrawer,
+                    index = index,
+                    onSelectedIndexChange = onSelectedIndexChange,
+                    destinations = destinations,
+                    body = body,
+                    smallBody = smallBody,
+                    secondaryBody = secondaryBody,
+                    smallSecondaryBody = smallSecondaryBody,
+                    overlay = overlay,
+                    bottomBarHeight = bottomBarHeight
+                )
             }
-        ) { padding ->
-            AdaptiveScaffoldContent(
-                foldDef = foldDef,
-                paddingValues = padding,
-                hasNavigationRail = hasNavigationRail,
-                hasDrawer = hasDrawer,
-                index = index,
-                onSelectedIndexChange = onSelectedIndexChange,
-                destinations = destinations,
-                body = body,
-                smallBody = smallBody,
-                secondaryBody = secondaryBody,
-                smallSecondaryBody = smallSecondaryBody,
-                overlay = overlay,
-                bottomBarHeight = bottomBarHeight
-            )
         }
     }
 }

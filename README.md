@@ -31,7 +31,7 @@ implementation dependency:
 
 ```groovy
 dependencies {
-    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.4.1"
+    implementation "com.github.tkuenneth:compose_adaptive_scaffold:0.4.2"
 }
 ```
 
@@ -92,9 +92,11 @@ This is just a tiny wrapper. It is implemented like this:
 
 ```kotlin
 fun ComponentActivity.setContentRepeatOnLifecycleStarted(
+    enableEdgeToEdge: Boolean = false,
     parent: CompositionContext? = null,
     content: @Composable () -> Unit
 ) {
+    if (enableEdgeToEdge) enableEdgeToEdge()
     lifecycleScope.launch {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             setContent(
