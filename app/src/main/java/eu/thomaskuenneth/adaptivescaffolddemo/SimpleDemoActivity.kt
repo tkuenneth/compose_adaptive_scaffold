@@ -67,28 +67,21 @@ class SimpleDemoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentRepeatOnLifecycleStarted {
-            MaterialTheme(
-                content = {
-                    AdaptiveScaffold(
-                        startDestination = destination1,
-                        otherDestinations = listOf(destination2),
-                        onDestinationChanged = {
-                            // do something
-                        },
-                        topBar = {
-                            TopAppBar(
-                                title = {
-                                    Text(
-                                        text = stringResource(
-                                            id = R.string.app_name
-                                        )
-                                    )
-                                })
-                        },
-                    )
-                },
-                colorScheme = defaultColorScheme()
-            )
+            MaterialTheme(colorScheme = defaultColorScheme()) {
+                AdaptiveScaffold(
+                    destinations = listOf(destination1, destination2),
+                    onDestinationChanged = {
+                        // do something
+                    },
+                    topBar = {
+                        TopAppBar(title = {
+                            Text(
+                                text = stringResource(R.string.app_name)
+                            )
+                        })
+                    },
+                )
+            }
         }
     }
 }

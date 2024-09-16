@@ -21,10 +21,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -45,15 +43,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -112,14 +111,25 @@ fun Activity.AdaptiveScaffold(
     onDestinationChanged: (NavigationDestination) -> Unit = {},
     topBar: @Composable (scrollBehavior: TopAppBarScrollBehavior) -> Unit = {},
 ) {
-    val destinations = listOf(startDestination).plus(otherDestinations)
-    var index by rememberSaveable(
-        startDestination,
-        otherDestinations
-    ) {
-        val startIndex = destinations.indexOf(startDestination)
-        onDestinationChanged(destinations[startIndex])
-        mutableIntStateOf(startIndex)
+    AdaptiveScaffold(
+        useDrawer = useDrawer,
+        destinations = listOf(startDestination).plus(otherDestinations),
+        onDestinationChanged = onDestinationChanged,
+        topBar = topBar
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Activity.AdaptiveScaffold(
+    useDrawer: Boolean = false,
+    destinations: List<NavigationDestination>,
+    onDestinationChanged: (NavigationDestination) -> Unit = {},
+    topBar: @Composable (scrollBehavior: TopAppBarScrollBehavior) -> Unit = {},
+) {
+    var index by rememberSaveable(destinations) {
+        onDestinationChanged(destinations[0])
+        mutableIntStateOf(0)
     }
     val currentDestination = destinations[index]
     AdaptiveScaffold(
@@ -231,9 +241,7 @@ private fun AdaptiveScaffoldBottomBar(
                                 contentDescription = label
                             )
                         },
-                        label = {
-                            Text(text = label)
-                        }
+                        label = { Text(text = label) }
                     )
                 }
         }
@@ -260,9 +268,7 @@ private fun AdaptiveScaffoldNavigationRail(
                                 contentDescription = label
                             )
                         },
-                        label = {
-                            Text(text = label)
-                        }
+                        label = { Text(text = label) }
                     )
                 }
         }
@@ -278,9 +284,9 @@ private fun AdaptiveScaffoldDrawer(
 ) {
     if (hasDrawer && destinations.isNotEmpty())
         PermanentNavigationDrawer(
+            modifier = Modifier.consumeWindowInsets(WindowInsets.safeContent),
             drawerContent = {
-                PermanentDrawerSheet(Modifier.width(240.dp)) {
-                    Spacer(Modifier.height(12.dp))
+                PermanentDrawerSheet {
                     for (i in destinations.indices)
                         with(destinations[i]) {
                             val label = stringResource(id = label)
@@ -325,53 +331,43 @@ private fun AdaptiveScaffoldContent(
     bottomBarHeight: Dp
 ) {
     val content: @Composable () -> Unit = {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .consumeWindowInsets(WindowInsets.systemBars)
-                .windowInsetsPadding(WindowInsets.displayCutout)
-        ) {
+        Row {
             AdaptiveScaffoldNavigationRail(
                 hasNavigationRail = hasNavigationRail,
                 index = index,
                 onSelectedIndexChange = onSelectedIndexChange,
                 destinations = destinations,
             )
-            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                if (
-                    foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT &&
-                    foldDef.orientation == FoldingFeature.Orientation.HORIZONTAL &&
-                    (foldDef.state != FoldingFeature.State.HALF_OPENED)
-                ) {
-                    TwoPaneScreen(
-                        firstPane = smallBody,
-                        secondPane = smallSecondaryBody,
-                        maxWidth = maxWidth
-                    )
-                } else if (foldDef.hasFold) {
-                    FoldableScreen(
-                        foldDef = foldDef,
-                        body = body,
-                        secondaryBody = secondaryBody,
-                        bottomBarHeight = bottomBarHeight
-                    )
-                } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
-                    TwoPaneScreen(
-                        firstPane = body,
-                        secondPane = secondaryBody,
-                        maxWidth = maxWidth
-                    )
-                } else {
-                    TwoPaneScreen(
-                        firstPane = smallBody,
-                        secondPane = smallSecondaryBody,
-                        maxWidth = maxWidth
-                    )
-                }
-                if (overlay != null) {
-                    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                        overlay()
-                    }
+            if (
+                foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT &&
+                foldDef.orientation == FoldingFeature.Orientation.HORIZONTAL &&
+                (foldDef.state != FoldingFeature.State.HALF_OPENED)
+            ) {
+                TwoPaneScreen(
+                    firstPane = smallBody,
+                    secondPane = smallSecondaryBody
+                )
+            } else if (foldDef.hasFold) {
+                FoldableScreen(
+                    foldDef = foldDef,
+                    body = body,
+                    secondaryBody = secondaryBody,
+                    bottomBarHeight = bottomBarHeight
+                )
+            } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
+                TwoPaneScreen(
+                    firstPane = body,
+                    secondPane = secondaryBody
+                )
+            } else {
+                TwoPaneScreen(
+                    firstPane = smallBody,
+                    secondPane = smallSecondaryBody
+                )
+            }
+            if (overlay != null) {
+                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                    overlay()
                 }
             }
         }
@@ -394,31 +390,27 @@ private fun AdaptiveScaffoldContent(
 @Composable
 private fun TwoPaneScreen(
     firstPane: @Composable () -> Unit,
-    secondPane: (@Composable () -> Unit)?,
-    maxWidth: Dp
+    secondPane: (@Composable () -> Unit)?
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    if (secondPane == null) {
+        Box(modifier = Modifier.fillMaxSize()) { firstPane() }
+    } else {
         Row(
             modifier = Modifier.fillMaxSize(),
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .weight(1.0F)
+                    .weight(0.5F)
             ) {
                 firstPane()
             }
-            if (secondPane != null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .size(maxWidth / 2)
-                ) {
-                    secondPane()
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(0.5F)
+            ) {
+                secondPane()
             }
         }
     }
@@ -431,6 +423,8 @@ private fun FoldableScreen(
     secondaryBody: @Composable () -> Unit,
     bottomBarHeight: Dp,
 ) {
+    val density = LocalDensity.current
+    var y by remember { mutableFloatStateOf(0F) }
     val hinge = @Composable {
         Spacer(
             modifier = Modifier
@@ -458,11 +452,15 @@ private fun FoldableScreen(
                 }
             }
         } else {
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .onGloballyPositioned {
+                    y = it.positionInWindow().y
+                }) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1.0F)
+                        .height(foldDef.heightLeftOrTop - with(density) { y.toDp() })
                 ) {
                     body()
                 }

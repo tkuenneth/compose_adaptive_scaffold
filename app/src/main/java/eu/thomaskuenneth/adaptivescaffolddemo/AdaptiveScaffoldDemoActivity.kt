@@ -46,12 +46,8 @@ import eu.thomaskuenneth.adaptivescaffold.setContentRepeatOnLifecycleStarted
 fun destinationOne(showSmallSecondaryBody: Boolean) = NavigationDestination(
     icon = R.drawable.ic_android_black_24dp,
     label = R.string.one,
-    body = {
-        Body()
-    },
-    smallBody = {
-        SmallBody()
-    },
+    body = { Body() },
+    smallBody = { SmallBody() },
     secondaryBody = { SecondaryBody() },
     smallSecondaryBody = if (showSmallSecondaryBody) {
         { SmallSecondaryBody() }
@@ -71,28 +67,25 @@ class AdaptiveScaffoldDemoActivity : ComponentActivity() {
         setContentRepeatOnLifecycleStarted(enableEdgeToEdge = true) {
             var toggleSmallSecondaryBodyVisible by rememberSaveable { mutableStateOf(false) }
             var showSmallSecondaryBody by rememberSaveable { mutableStateOf(true) }
-            MaterialTheme(
-                content = {
-                    AdaptiveScaffold(
-                        useDrawer = true,
-                        startDestination = destinationOne(showSmallSecondaryBody),
-                        otherDestinations = listOf(destinationFoldInfo),
-                        onDestinationChanged = {
-                            toggleSmallSecondaryBodyVisible = it != destinationFoldInfo
-                        },
-                        topBar = { scrollBehavior ->
-                            AdaptiveScaffoldDemoTopAppBar(
-                                scrollBehavior = scrollBehavior,
-                                toggleSmallSecondaryBodyVisible = toggleSmallSecondaryBodyVisible,
-                                toggleSmallSecondaryBodyClicked = {
-                                    showSmallSecondaryBody = !showSmallSecondaryBody
-                                }
-                            )
-                        },
-                    )
-                },
-                colorScheme = defaultColorScheme()
-            )
+            MaterialTheme(colorScheme = defaultColorScheme()) {
+                AdaptiveScaffold(
+                    useDrawer = true,
+                    startDestination = destinationOne(showSmallSecondaryBody),
+                    otherDestinations = listOf(destinationFoldInfo),
+                    onDestinationChanged = {
+                        toggleSmallSecondaryBodyVisible = it != destinationFoldInfo
+                    },
+                    topBar = { scrollBehavior ->
+                        AdaptiveScaffoldDemoTopAppBar(
+                            scrollBehavior = scrollBehavior,
+                            toggleSmallSecondaryBodyVisible = toggleSmallSecondaryBodyVisible,
+                            toggleSmallSecondaryBodyClicked = {
+                                showSmallSecondaryBody = !showSmallSecondaryBody
+                            }
+                        )
+                    },
+                )
+            }
         }
     }
 }
@@ -115,26 +108,16 @@ fun AdaptiveScaffoldDemoTopAppBar(
                     toggleSmallSecondaryBodyClicked()
                     moreOpen = false
                 },
-                text = {
-                    Text(
-                        text = stringResource(id = R.string.toggle_small_secondary_body)
-                    )
-                }
+                text = { Text(stringResource(id = R.string.toggle_small_secondary_body)) }
             )
         }
     }
     TopAppBar(
         scrollBehavior = scrollBehavior,
-        title = {
-            Text(text = stringResource(id = R.string.app_name))
-        },
+        title = { Text(text = stringResource(id = R.string.app_name)) },
         actions = {
             if (menuItems.isNotEmpty()) {
-                IconButton(
-                    onClick = {
-                        moreOpen = true
-                    }
-                ) {
+                IconButton(onClick = { moreOpen = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = stringResource(id = R.string.options_menu)
@@ -144,9 +127,7 @@ fun AdaptiveScaffoldDemoTopAppBar(
                     expanded = moreOpen,
                     onDismissRequest = { moreOpen = false }
                 ) {
-                    menuItems.forEach {
-                        it()
-                    }
+                    menuItems.forEach { it() }
                 }
             }
         }
