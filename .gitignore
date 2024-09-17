@@ -19,3 +19,4 @@ local.properties
 .idea/deploymentTargetSelector.xml
 .idea/inspectionProfiles/Project_Default.xml
 .idea/gradle.xml
+.idea/studiobot.xml

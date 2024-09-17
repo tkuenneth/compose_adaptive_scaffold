@@ -56,10 +56,10 @@ fun createFoldDef(
         dpHeight = windowHeightDp(windowMetrics = windowMetrics).value
     )
     val currentPortrait = windowWidthDp(windowMetrics) / windowHeightDp(windowMetrics) <= 1F
+    val navigationBars = windowMetrics.getWindowInsets()
+        .getInsets(WindowInsetsCompat.Type.navigationBars())
     layoutInfo?.displayFeatures?.forEach { displayFeature ->
         (displayFeature as FoldingFeature).run {
-            val navigationBars = windowMetrics.getWindowInsets()
-                .getInsets(WindowInsetsCompat.Type.navigationBars())
             var foldWidth = bounds.width()
             var foldHeight = bounds.height()
             val foldAdjusted = isSurfaceDuo && (foldWidth == 0 || foldHeight == 0)
@@ -112,7 +112,8 @@ fun createFoldDef(
     }
     return FoldDef.EMPTY.copy(
         windowSizeClass = currentWindowSizeClass,
-        isPortrait = currentPortrait
+        isPortrait = currentPortrait,
+        navigationBars = navigationBars
     )
 }
 

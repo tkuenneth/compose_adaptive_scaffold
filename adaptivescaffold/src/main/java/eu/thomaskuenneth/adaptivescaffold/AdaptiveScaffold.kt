@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.width
@@ -56,7 +57,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -212,8 +212,7 @@ fun Activity.AdaptiveScaffold(
                 smallBody = smallBody,
                 secondaryBody = secondaryBody,
                 smallSecondaryBody = smallSecondaryBody,
-                overlay = overlay,
-                bottomBarHeight = bottomBarHeight
+                overlay = overlay
             )
         }
     }
@@ -326,8 +325,7 @@ private fun AdaptiveScaffoldContent(
     smallBody: @Composable () -> Unit,
     secondaryBody: @Composable () -> Unit,
     smallSecondaryBody: @Composable (() -> Unit)?,
-    overlay: @Composable (BoxScope.() -> Unit)? = null,
-    bottomBarHeight: Dp
+    overlay: @Composable (BoxScope.() -> Unit)? = null
 ) {
     val content: @Composable () -> Unit = {
         Row {
@@ -344,6 +342,7 @@ private fun AdaptiveScaffoldContent(
                     (foldDef.state != FoldingFeature.State.HALF_OPENED)
                 ) {
                     TwoPaneScreen(
+                        foldDef = foldDef,
                         firstPane = smallBody,
                         secondPane = smallSecondaryBody
                     )
@@ -351,16 +350,17 @@ private fun AdaptiveScaffoldContent(
                     FoldableScreen(
                         foldDef = foldDef,
                         body = body,
-                        secondaryBody = secondaryBody,
-                        bottomBarHeight = bottomBarHeight
+                        secondaryBody = secondaryBody
                     )
                 } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
                     TwoPaneScreen(
+                        foldDef = foldDef,
                         firstPane = body,
                         secondPane = secondaryBody
                     )
                 } else {
                     TwoPaneScreen(
+                        foldDef = foldDef,
                         firstPane = smallBody,
                         secondPane = smallSecondaryBody
                     )
@@ -377,6 +377,7 @@ private fun AdaptiveScaffoldContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues = paddingValues)
+            .consumeWindowInsets(WindowInsets.navigationBars)
     ) {
         AdaptiveScaffoldDrawer(
             hasDrawer = hasDrawer,
@@ -390,14 +391,25 @@ private fun AdaptiveScaffoldContent(
 
 @Composable
 private fun TwoPaneScreen(
+    foldDef: FoldDef,
     firstPane: @Composable () -> Unit,
     secondPane: (@Composable () -> Unit)?
 ) {
+    val navigationBarHeight = with(LocalDensity.current) {
+        (foldDef.navigationBars.bottom - foldDef.navigationBars.top).toDp()
+    }
+    val bottomPadding = if (navigationBarHeight >= 50.dp) navigationBarHeight else 0.dp
     if (secondPane == null) {
-        Box(modifier = Modifier.fillMaxSize()) { firstPane() }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = bottomPadding)
+        ) { firstPane() }
     } else {
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = bottomPadding),
         ) {
             Box(
                 modifier = Modifier
@@ -421,60 +433,69 @@ private fun TwoPaneScreen(
 private fun FoldableScreen(
     foldDef: FoldDef,
     body: @Composable () -> Unit,
-    secondaryBody: @Composable () -> Unit,
-    bottomBarHeight: Dp,
+    secondaryBody: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
-    var y by remember { mutableFloatStateOf(0F) }
-    val hinge = @Composable {
-        Spacer(
-            modifier = Modifier
-                .width(foldDef.foldWidth)
-                .height(foldDef.foldHeight)
-        )
-    }
-    val container = @Composable {
-        if (foldDef.orientation == FoldingFeature.Orientation.VERTICAL) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                Box(
+    with(density) {
+        var y by remember { mutableFloatStateOf(0F) }
+        val navigationBarHeight =
+            (foldDef.navigationBars.bottom - foldDef.navigationBars.top).toDp()
+        val hinge = @Composable {
+            Spacer(
+                modifier = Modifier
+                    .width(foldDef.foldWidth)
+                    .height(foldDef.foldHeight)
+            )
+        }
+        val bottomPadding = if (navigationBarHeight >= 50.dp) navigationBarHeight else 0.dp
+        val container = @Composable {
+            if (foldDef.orientation == FoldingFeature.Orientation.VERTICAL) {
+                Row(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1.0F)
+                        .fillMaxSize()
+                        .padding(bottom = bottomPadding)
                 ) {
-                    body()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .weight(1.0F)
+                    ) {
+                        body()
+                    }
+                    hinge()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(foldDef.widthRightOrBottom)
+                    ) {
+                        secondaryBody()
+                    }
                 }
-                hinge()
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(foldDef.widthRightOrBottom)
-                ) {
-                    secondaryBody()
-                }
-            }
-        } else {
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .onGloballyPositioned {
-                    y = it.positionInWindow().y
-                }) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(foldDef.heightLeftOrTop - with(density) { y.toDp() })
-                ) {
-                    body()
-                }
-                hinge()
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(foldDef.heightRightOrBottom - bottomBarHeight)
-                ) {
-                    secondaryBody()
+            } else {
+                Column(modifier = Modifier
+                    .fillMaxSize()
+                    .onGloballyPositioned {
+                        y = it.positionInWindow().y
+                    }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(foldDef.heightLeftOrTop - y.toDp() - (foldDef.foldHeight / 2))
+                    ) {
+                        body()
+                    }
+                    hinge()
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = bottomPadding)
+                            .weight(1F)
+                    ) {
+                        secondaryBody()
+                    }
                 }
             }
         }
+        container()
     }
-    container()
 }
