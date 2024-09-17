@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -338,36 +337,38 @@ private fun AdaptiveScaffoldContent(
                 onSelectedIndexChange = onSelectedIndexChange,
                 destinations = destinations,
             )
-            if (
-                foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT &&
-                foldDef.orientation == FoldingFeature.Orientation.HORIZONTAL &&
-                (foldDef.state != FoldingFeature.State.HALF_OPENED)
-            ) {
-                TwoPaneScreen(
-                    firstPane = smallBody,
-                    secondPane = smallSecondaryBody
-                )
-            } else if (foldDef.hasFold) {
-                FoldableScreen(
-                    foldDef = foldDef,
-                    body = body,
-                    secondaryBody = secondaryBody,
-                    bottomBarHeight = bottomBarHeight
-                )
-            } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
-                TwoPaneScreen(
-                    firstPane = body,
-                    secondPane = secondaryBody
-                )
-            } else {
-                TwoPaneScreen(
-                    firstPane = smallBody,
-                    secondPane = smallSecondaryBody
-                )
-            }
-            if (overlay != null) {
-                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                    overlay()
+            Box {
+                if (
+                    foldDef.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT &&
+                    foldDef.orientation == FoldingFeature.Orientation.HORIZONTAL &&
+                    (foldDef.state != FoldingFeature.State.HALF_OPENED)
+                ) {
+                    TwoPaneScreen(
+                        firstPane = smallBody,
+                        secondPane = smallSecondaryBody
+                    )
+                } else if (foldDef.hasFold) {
+                    FoldableScreen(
+                        foldDef = foldDef,
+                        body = body,
+                        secondaryBody = secondaryBody,
+                        bottomBarHeight = bottomBarHeight
+                    )
+                } else if (foldDef.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
+                    TwoPaneScreen(
+                        firstPane = body,
+                        secondPane = secondaryBody
+                    )
+                } else {
+                    TwoPaneScreen(
+                        firstPane = smallBody,
+                        secondPane = smallSecondaryBody
+                    )
+                }
+                if (overlay != null) {
+                    BoxWithConstraints {
+                        overlay()
+                    }
                 }
             }
         }
